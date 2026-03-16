@@ -1,7 +1,8 @@
 import  express  from "express";
 import { ENV } from "./config/env";
 import { connectDB } from "./config/db";
-import router from "./routes/authRoutes";
+import authRoutes from "./routes/authRoutes";
+import categoryRoutes from "./routes/categoryRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./core/AppSwagger.json";
@@ -17,7 +18,9 @@ app.use(express.json());
 connectDB();
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use("/api/auth",router)
+app.use("/api/auth",authRoutes);
+app.use("/api/categories",categoryRoutes);
+
 
 const PORT = ENV.PORT;
 app.listen(PORT, () => {
