@@ -9,8 +9,8 @@ import { sendVerificationEmail } from "../utils/notification";
 import { successResponse, errorResponse } from "../utils/response";
 
 export const register = async (req: Request, res: Response) => {
-  try {
-    const { name, email, password, phone } = req.body;
+  try { 
+    const { name, email, password, phone,role } = req.body;
 
     if (isEmpty(name) || isEmpty(email) || isEmpty(password)) {
       return errorResponse(res, "Name, email and password are required", 400);
@@ -20,9 +20,14 @@ export const register = async (req: Request, res: Response) => {
       return errorResponse(res, "Invalid email format", 400);
     }
 
-    if (req.body.role) {
-      return errorResponse(res, "Role assignment not allowed during registration", 403);
-  }
+    const allowedRoles = ["user", "organizer"];
+    if (role && !allowedRoles.includes(role)) {
+        return errorResponse(res, "Invalid role selected", 400);
+    }
+
+  //   if (req.body.role) {
+  //     return errorResponse(res, "Role assignment not allowed during registration", 403);
+  // }
 
     //paranoid: false - if the user is deleted and then again register with same email
     const existingUser = await UserModel.findOne({
@@ -42,7 +47,11 @@ export const register = async (req: Request, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      phone, role: "user", is_verified: false, status: "active"
+      phone, 
+      role: role || "user",
+      is_verified: false, 
+      status: "active",
+      organizer_status: role === "organizer" ? "pending" : null
     });
 
     //generate verification Token 
@@ -96,6 +105,10 @@ export const login = async (req: Request, res: Response) => {
     if (!user.is_verified) {
       return errorResponse(res, "Please verify your email before login", 403);
     }
+
+    if (user.role === "organizer" && user.organizer_status !== "approved") {
+      return errorResponse(res, "Organizer account pending admin approval", 403);
+  }
 
     if (user.lock_until && new Date() < user.lock_until) {
       return errorResponse(res, "Account locked due to multiple failed attempts. Try again later.", 403);

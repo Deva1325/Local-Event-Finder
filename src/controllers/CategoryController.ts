@@ -50,7 +50,7 @@ export const getCategory = async (req: Request, res: Response) => {
 
 export const getCategoryById = async (req: Request, res: Response) => {
     try {       
-        const id = req.params.id as string;
+        const id = Number(req.params.id);
         
         const category = await CategoryModel.findByPk(id);
 
@@ -68,7 +68,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
     try {
-        const  id  = req.params.id as string;
+        const  id  = Number(req.params.id);
         const { name, description, status } = req.body;
 
         const category = await CategoryModel.findByPk(id);
@@ -93,7 +93,7 @@ export const updateCategory = async (req: Request, res: Response) => {
 
 export const deleteCategory = async (req: Request, res: Response) => {
     try {
-        const  id  = req.params.id as string;
+        const  id  = Number(req.params.id);
 
         if (!id) {
             return errorResponse(res, "ID is required", 400);
@@ -118,3 +118,4 @@ export const deleteCategory = async (req: Request, res: Response) => {
         return errorResponse(res, "Internal Server Error", 500);
     }
 }
+

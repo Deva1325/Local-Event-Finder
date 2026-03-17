@@ -44,6 +44,11 @@
                   },
                   "phone": {
                     "type": "string"
+                  },
+                  "role" :{
+                    "type": "string", 
+                    "enum": ["user", "organizer"], 
+                    "description": "Defaults to 'user' if not provided"
                   }
                 },
                 "required": ["name", "email", "password"]

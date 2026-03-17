@@ -20,6 +20,7 @@ interface UserAttributes {
     deleted_at: Date | null;
     verification_token: string | null;
     verification_token_expiry: Date | null;
+    organizer_status: "pending" | "approved" | "rejected" | null;
 }
 
 interface UserCreationAttributes extends Optional < 
@@ -30,7 +31,9 @@ interface UserCreationAttributes extends Optional <
     |"reset_password_token" | "reset_password_expiry" | "failed_login_attempts" | "lock_until" 
     | "verification_token" | "verification_token_expiry"
     // | "created_at" | "updated_at" | "deleted_at"> {}
-    | "deleted_at"> {}
+    | "deleted_at"
+    | "organizer_status"
+    > {}
 
 class UserModel extends Model<UserAttributes, UserCreationAttributes>
 implements UserAttributes
@@ -53,6 +56,7 @@ implements UserAttributes
     public deleted_at!: Date | null;
     public verification_token!: string | null;
     public verification_token_expiry!: Date | null;
+    public organizer_status!: "pending" | "approved" | "rejected" | null;
 }
 
 UserModel.init(
@@ -135,7 +139,11 @@ UserModel.init(
     verification_token_expiry: {
       type: DataTypes.DATE,
       allowNull: true
-    }
+    },
+    organizer_status: {
+  type: DataTypes.ENUM("pending", "approved", "rejected"),
+  allowNull: true
+}
     // created_at: {
     //   type: DataTypes.DATE,
     //   allowNull: false
