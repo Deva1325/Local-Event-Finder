@@ -18,9 +18,13 @@ export const authorizeRoles = (...roles:string[])=>{
 
         if (roles.includes("organizer") && user.organizer_status!=="approved") {
             return res.status(403).json({
-                message : "Organizer not approved by admin"
+                message : "Organizer not approved by"
             });
         }
+
+        console.log("USER FROM TOKEN:", user);
         next();
+
+        
     }
 };

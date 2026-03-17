@@ -150,7 +150,8 @@ export const login = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken({
       user_id: user.user_id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      organizer_status: user.organizer_status
     });
 
     //Refresh Token

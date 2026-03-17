@@ -3,6 +3,13 @@ export const isValidEmail = (email: string): boolean =>{
     return regex.test(email);
 }
 export const isEmpty = (value: string): boolean => {
-  return !value || value.trim() === "";
+
+  if (value==null || value==undefined) {
+    return true;
+  }
+  if (typeof value === "string" && value.trim()==="") {
+    return true;
+  }
+  return false;
 };
 
