@@ -12,3 +12,8 @@ export const errorResponse = (res: any,message: string,statusCode = 500) => {
     message,
   });
 };
+
+
+// http://localhost:3000/api-docs
+
+// http://192.168.1.103:3000/api-docs

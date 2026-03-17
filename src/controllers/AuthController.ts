@@ -21,12 +21,15 @@ export const register = async (req: Request, res: Response) => {
     }
 
     if (req.body.role) {
-  return errorResponse(res, "Role assignment not allowed during registration", 403);
-}
+      return errorResponse(res, "Role assignment not allowed during registration", 403);
+  }
 
+    //paranoid: false - if the user is deleted and then again register with same email
     const existingUser = await UserModel.findOne({
-      where: { email }
+      where: { email  } 
+      //paranoid : false
     });
+
 
     if (existingUser) {
       return errorResponse(res, "Email already registered", 400);
@@ -57,7 +60,7 @@ export const register = async (req: Request, res: Response) => {
     const verificationLink = `http://localhost:${ENV.PORT}/api/auth/verify-email?token=${verificationToken}`;
 
     await sendVerificationEmail(user.email, verificationLink);
-    
+
     return successResponse(res, "User registered successfully. Please check your email.", {
     user_id: user.user_id,
     name: user.name,
@@ -250,8 +253,6 @@ export const logout = async (req: Request, res: Response) => {
     });
 
     return successResponse(res, "Logout successful");
-    message: "Logout successful"
-
 
   } catch (error) {
     console.error("Logout error:", error);
