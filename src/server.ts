@@ -29,7 +29,9 @@ app.use("/api/admin",adminRoutes);
 app.use("/api/events",eventRoutes);
 
 
-const PORT = ENV.PORT;
-app.listen(PORT, () => {
+const PORT = Number(ENV.PORT) || 3000;
+
+app.listen(PORT,'0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`Network: http://192.168.1.103:${PORT}`); // Double check this IP!
 });

@@ -2,6 +2,8 @@ import { Request , Response } from "express";
 import EventModel  from "../models/EventModel";
 import { successResponse,errorResponse } from "../utils/response";
 import { isEmpty } from "../utils/validator";
+import cloudinary from "../config/cloudinary";
+
 
 export const createEvent = async (req:Request,res : Response) => {
     try {
@@ -21,6 +23,8 @@ export const createEvent = async (req:Request,res : Response) => {
         if (Number(ticket_price) < 0) {
             return errorResponse(res, "Ticket price cannot be negative", 400);
         }
+
+        //let image_url=null;
 
         const event = await EventModel.create({
             organizer_id : user.user_id,
@@ -43,4 +47,60 @@ export const createEvent = async (req:Request,res : Response) => {
         console.error("Create Event Error:", error);
         return errorResponse(res, "Internal server error");
   }
+}
+
+export const updateEvent = async (req:Request,res : Response) => {
+    try {
+    const user = (req as any).user;
+    const eventId = Number(req.params.id);   
+
+    const event = await EventModel.findByPk(eventId);
+    
+    if (!event) {
+        return errorResponse(res, "Event not found", 404);
+    }
+
+    //check for ownership
+    if (event.organizer_id!==user.user_id) {
+        return errorResponse(res,"You can only update your own events",403);
+    }
+
+    //only draft can be updated
+    if (event.status!=="draft") {
+        return errorResponse(res, "Only draft events can be updated", 400);
+    }
+
+    const {title,description,location,image_url,event_date,event_time,ticket_price,total_seats } = req.body;
+    
+    let newAvailableSeats=event.available_seats;
+    
+    //if new total_seats are updated then
+    if (total_seats!==undefined) { 
+        const soldTickets = event.total_seats- event.available_seats; // db value => current state
+        
+         if (total_seats < soldTickets) {
+        return errorResponse(res,`Cannot reduce capacity below sold tickets (${soldTickets})`,400);
+        }   
+
+        newAvailableSeats=total_seats-soldTickets; 
+    }
+
+    await event.update({
+        title : title ?? event.title,
+        description: description ?? event.description,
+        location: location ?? event.location,
+        image_url: image_url ?? event.image_url,
+        event_date: event_date ?? event.event_date,
+        event_time: event_time ?? event.event_time,
+        ticket_price: ticket_price ?? event.ticket_price,
+        total_seats: total_seats ?? event.total_seats,       
+        available_seats : newAvailableSeats
+    });    
+
+        return successResponse(res, "Event updated successfully", event);
+
+    } catch (error) {
+        console.error("Update Event Error:", error);
+        return errorResponse(res, "Internal server error");
+    }
 }

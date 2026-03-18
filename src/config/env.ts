@@ -10,6 +10,7 @@ export const ENV = {
   DB_PASSWORD: process.env.DB_PASSWORD || "",
   DB_NAME: process.env.DB_NAME || "local_event_finder",
   DB_PORT: Number(process.env.DB_PORT) || 3306,
+  BASE_URL: process.env.BASE_URL || "http://localhost:3000",
 
   JWT_SECRET: process.env.JWT_SECRET || "secret",
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "refreshsecret",
@@ -18,5 +19,9 @@ export const ENV = {
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   
   SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
-  SENDGRID_FROM_EMAIL: process.env.SENDGRID_FROM_EMAIL
+  SENDGRID_FROM_EMAIL: process.env.SENDGRID_FROM_EMAIL,
+
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET
 };

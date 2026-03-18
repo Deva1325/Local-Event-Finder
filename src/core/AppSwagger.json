@@ -7,8 +7,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
+      "url": "http://localhost:3000/api",
       "description": "Local Development Server"
+    },
+    {
+      "url": "http://192.168.1.103:3000/api",
+      "description": "Shared Network Server 192.168.1.103"
     }
   ],
   "components": {
@@ -22,7 +26,7 @@
   },
   "paths": {
 
-    "/api/auth/register": {
+    "/auth/register": {
       "post": {
         "summary": "Register new user",
         "tags": ["Authentication"],
@@ -64,7 +68,7 @@
       }
     },
 
-    "/api/auth/verify-email": {
+    "/auth/verify-email": {
       "get": {
         "summary": "Verify user email",
         "tags": ["Authentication"],
@@ -86,7 +90,7 @@
       }
     },
 
-    "/api/auth/login": {
+    "/auth/login": {
       "post": {
         "summary": "User login",
         "tags": ["Authentication"],
@@ -117,7 +121,7 @@
       }
     },
 
-    "/api/auth/refresh-token": {
+    "/auth/refresh-token": {
       "post": {
         "summary": "Generate new access token using refresh token",
         "tags": ["Authentication"],
@@ -145,7 +149,7 @@
       }
     },
 
-    "/api/auth/logout": {
+    "/auth/logout": {
       "post": {
         "summary": "Logout user",
         "tags": ["Authentication"],
@@ -173,7 +177,7 @@
       }
     },
 
-    "/api/auth/forgot-password": {
+    "/auth/forgot-password": {
       "post": {
         "summary": "Send password reset email",
         "tags": ["Authentication"],
@@ -201,7 +205,7 @@
       }
     },
 
-    "/api/auth/reset-password": {
+    "/auth/reset-password": {
       "post": {
         "summary": "Reset user password",
         "tags": ["Authentication"],
@@ -232,7 +236,7 @@
       }
     },
 
-    "/api/auth/profile": {
+    "/auth/profile": {
       "get": {
         "summary": "Get logged in user profile",
         "tags": ["Authentication"],
@@ -249,7 +253,7 @@
       }
     },
 
-    "/api/categories": {
+    "/categories": {
       "post": {
         "summary": "Create category (Admin only)",
         "tags": ["Category"],
@@ -295,7 +299,7 @@
       }
     },
 
-    "/api/categories/{id}": {
+    "/categories/{id}": {
       "get": {
         "summary": "Get category by ID",
         "tags": ["Category"],
