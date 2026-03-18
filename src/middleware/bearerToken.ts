@@ -8,7 +8,7 @@ export const bearerToken = async (req:Request, res : Response,next : NextFunctio
         
         if (!authHeader) {
             return res.status(401).json({
-                message : "Authorization Header Missing"
+                message : "Authorization header missing"
             });
         }
 
@@ -16,7 +16,7 @@ export const bearerToken = async (req:Request, res : Response,next : NextFunctio
 
         if (!token) {
             return res.status(401).json({
-                message : "Access Token Missing"
+                message : "Access Token missing"
             });
         }
     
@@ -26,9 +26,6 @@ export const bearerToken = async (req:Request, res : Response,next : NextFunctio
         (req as any).user = decoded;
 
         next();
-
-
-
     } catch (error) {
          return res.status(401).json({
             message: "Invalid or expired token"

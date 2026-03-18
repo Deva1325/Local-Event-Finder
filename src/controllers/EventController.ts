@@ -7,24 +7,34 @@ import cloudinary from "../config/cloudinary";
 
 export const createEvent = async (req:Request,res : Response) => {
     try {
+
+       // console.log("req body:",req.body);
+        
         const user = (req as any).user;
 
-        const { category_id,title,image_url,description,location,
+        const { category_id,title,description,location,
             event_date,event_time,ticket_price,total_seats } = req.body;
 
         if (isEmpty(title) || isEmpty(category_id) || isEmpty(event_date) || isEmpty(ticket_price) || isEmpty(total_seats) ) {
             return errorResponse(res, "Required fields are missing", 400);
         }
-
         if (Number(total_seats)<=0) {
             return errorResponse(res,"Total seats must be greater than 0",400);
-        }
-        
+        }      
         if (Number(ticket_price) < 0) {
             return errorResponse(res, "Ticket price cannot be negative", 400);
         }
 
-        //let image_url=null;
+        let image_url=null;
+
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "local_events_demo" 
+            });
+            image_url = result.secure_url; // the real https:// 
+            //console.log("image_url:", image_url);
+            
+        }
 
         const event = await EventModel.create({
             organizer_id : user.user_id,
@@ -40,11 +50,10 @@ export const createEvent = async (req:Request,res : Response) => {
             available_seats: total_seats,
             status : "draft"
         });
-
         return successResponse(res, "Event created successfully", event, 201);
 
     } catch (error) {
-        console.error("Create Event Error:", error);
+        console.error("Create event error:", error);
         return errorResponse(res, "Internal server error");
   }
 }
@@ -59,7 +68,6 @@ export const updateEvent = async (req:Request,res : Response) => {
     if (!event) {
         return errorResponse(res, "Event not found", 404);
     }
-
     //check for ownership
     if (event.organizer_id!==user.user_id) {
         return errorResponse(res,"You can only update your own events",403);
@@ -74,14 +82,13 @@ export const updateEvent = async (req:Request,res : Response) => {
     
     let newAvailableSeats=event.available_seats;
     
-    //if new total_seats are updated then
-    if (total_seats!==undefined) { 
         const soldTickets = event.total_seats- event.available_seats; // db value => current state
         
+            //if new total_seats are updated then
+            if (total_seats!==undefined) { 
          if (total_seats < soldTickets) {
-        return errorResponse(res,`Cannot reduce capacity below sold tickets (${soldTickets})`,400);
+        return errorResponse(res,`total_seats cannot be less than sold tickets (${soldTickets})`,400);
         }   
-
         newAvailableSeats=total_seats-soldTickets; 
     }
 
@@ -96,11 +103,10 @@ export const updateEvent = async (req:Request,res : Response) => {
         total_seats: total_seats ?? event.total_seats,       
         available_seats : newAvailableSeats
     });    
-
         return successResponse(res, "Event updated successfully", event);
 
     } catch (error) {
-        console.error("Update Event Error:", error);
+        console.error("Update eventerror:", error);
         return errorResponse(res, "Internal server error");
     }
 }

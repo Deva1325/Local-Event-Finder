@@ -9,7 +9,7 @@ export const adminBearerToken = async (req: Request, res: Response, next: NextFu
 
         if (!authHeader) {
             return res.status(401).json({
-                message: "Authorization Header Missing"
+                message: "Authorization header missing"
             });
         }
 
@@ -17,7 +17,7 @@ export const adminBearerToken = async (req: Request, res: Response, next: NextFu
 
         if (!token) {
             return res.status(401).json({
-                message: "Access Token Missing"
+                message: "Access Token missing"
             });
         }
 
@@ -25,15 +25,13 @@ export const adminBearerToken = async (req: Request, res: Response, next: NextFu
 
         if (decoded.role !== "admin") {
             return res.status(403).json({
-                message: "Access denied. Admins only."
+                message: "Access denied, admins only."
             });
         }
 
         (req as any).user = decoded;
 
         next();
-
-
     } catch (error) {
         return res.status(401).json({
             message: "Invalid or expired token"

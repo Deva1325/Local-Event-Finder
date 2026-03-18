@@ -6,6 +6,6 @@ import upload from "../middleware/upload";
 
 const router=express.Router();
 
-router.post("/create",bearerToken,authorizeRoles("organizer"),createEvent);
-router.put("/:event_id",bearerToken,authorizeRoles("organizer"),upload.single("image"),updateEvent);
+router.post("/create",bearerToken,authorizeRoles("organizer"),upload.single("image"),createEvent);
+router.put("/:id",bearerToken,authorizeRoles("organizer"),upload.single("image"),updateEvent);
 export default router;

@@ -68,7 +68,7 @@ export const register = async (req: Request, res: Response) => {
 
     //const networkIP = "192.168.1.103"; 
 
-    const verificationLink = `${ENV.BASE_URL}:${ENV.PORT}/api/auth/verify-email?token=${verificationToken}`;
+    const verificationLink = `${ENV.BASE_URL}/api/auth/verify-email?token=${verificationToken}`;
 
     await sendVerificationEmail(user.email, verificationLink);
 
