@@ -9,7 +9,8 @@ interface EventAttributes {
     image_url: string | null;
     description: string | null;
     location: string | null;
-    event_date: Date;
+    start_date: Date;
+    end_date: Date;
     event_time: string;
     ticket_price: number;
     total_seats: number;
@@ -35,7 +36,8 @@ implements EventAttributes
     public image_url!: string | null;
     public description!: string | null;
     public location!: string | null;
-    public event_date!: Date;
+    public start_date!: Date;
+    public end_date!: Date;
     public event_time!: string;
     public ticket_price!: number;
     public total_seats!: number;
@@ -82,7 +84,11 @@ EventModel.init(
       allowNull: true
     },
 
-    event_date: {
+    start_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    end_date: {
       type: DataTypes.DATEONLY,
       allowNull: false
     },

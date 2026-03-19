@@ -26,3 +26,12 @@ export const approveOrganizer = async (req: Request, res: Response) => {
             return errorResponse(res, "Internal server error");
         }
 }
+
+
+/*
+{
+  "email": "admin@eventfinder.com",
+  "password": "admin@123"
+}
+
+*/

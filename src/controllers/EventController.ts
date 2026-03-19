@@ -3,6 +3,7 @@ import EventModel  from "../models/EventModel";
 import { successResponse,errorResponse } from "../utils/response";
 import { isEmpty } from "../utils/validator";
 import cloudinary from "../config/cloudinary";
+import { endianness } from "node:os";
 
 
 export const createEvent = async (req:Request,res : Response) => {
@@ -12,10 +13,9 @@ export const createEvent = async (req:Request,res : Response) => {
         
         const user = (req as any).user;
 
-        const { category_id,title,description,location,
-            event_date,event_time,ticket_price,total_seats } = req.body;
+        const { category_id,title,description,location,start_date,end_date,event_time,ticket_price,total_seats } = req.body;
 
-        if (isEmpty(title) || isEmpty(category_id) || isEmpty(event_date) || isEmpty(ticket_price) || isEmpty(total_seats) ) {
+        if (isEmpty(title) || isEmpty(category_id) || isEmpty(start_date) || isEmpty(ticket_price) || isEmpty(total_seats) ) {
             return errorResponse(res, "Required fields are missing", 400);
         }
         if (Number(total_seats)<=0) {
@@ -25,6 +25,9 @@ export const createEvent = async (req:Request,res : Response) => {
             return errorResponse(res, "Ticket price cannot be negative", 400);
         }
 
+        if (new Date(end_date) < new Date(start_date)) {
+            return errorResponse(res, "End date cannot be before start date", 400);
+        }
         let image_url=null;
 
         if (req.file) {
@@ -41,7 +44,8 @@ export const createEvent = async (req:Request,res : Response) => {
             image_url,
             description,
             location,
-            event_date,
+            start_date,
+            end_date,
             event_time,
             ticket_price,
             total_seats,
@@ -76,7 +80,7 @@ export const getEventById = async (req:Request,res:Response) =>{
         if (!event) {
             return errorResponse(res, "Event not found", 404);
         }
-
+        
         return successResponse(res,"Event fetched successfully!",event,200);
 
     } catch (error) {
@@ -99,12 +103,11 @@ export const updateEvent = async (req:Request,res : Response) => {
         return errorResponse(res,"You can only update your own events",403);
     }
 
-    //only draft can be updated
     if (event.status!=="draft") {
         return errorResponse(res, "Only draft events can be updated", 400);
     }
 
-    const {title,description,location,image_url,event_date,event_time,ticket_price,total_seats } = req.body;
+    const {title,description,location,image_url,start_date,end_date,event_time,ticket_price,total_seats } = req.body;
     
     let newAvailableSeats=event.available_seats;
     
@@ -130,7 +133,8 @@ export const updateEvent = async (req:Request,res : Response) => {
         description: description ?? event.description,
         location: location ?? event.location,
         image_url: updateimg,
-        event_date: event_date ?? event.event_date,
+        start_date: start_date ?? event.start_date,
+        end_date: end_date ?? event.end_date,
         event_time: event_time ?? event.event_time,
         ticket_price: ticket_price ?? event.ticket_price,
         total_seats: total_seats ?? event.total_seats,       
@@ -142,3 +146,58 @@ export const updateEvent = async (req:Request,res : Response) => {
         return errorResponse(res, "Internal server error",500);
     }
 }
+
+export const deleteEvent = async (req:Request,res:Response) => {
+    try {
+        const user=(req as any).user;
+        const id=Number(req.params.id);
+
+        const event= await EventModel.findByPk(id);
+
+        if (!event) {
+            return errorResponse(res,"Event Not Found",400);
+        }
+
+        if (event.organizer_id!==user.user_id) {
+            return errorResponse(res,"You can only delete your own events",403);
+        }
+
+        await event.destroy();
+
+        return successResponse(res,"Event deleted successfully",event,200);
+
+    } catch (error) {
+        return errorResponse(res, "Internal server error",500);
+    }
+}
+
+export const cancelEvent = async (req:Request,res:Response) => {
+    try {
+        const user=(req as any).user;
+        const id=Number(req.params.id);
+
+        const event=await EventModel.findByPk(id);
+
+        if (!event) {
+            return errorResponse(res,"Event Not Found",404);
+        }
+
+        if (event.organizer_id!==user.user_id) {
+            return errorResponse(res,"You can cancel only your events",403);
+        }
+
+        const today_date=new Date();
+
+       if (today_date>=new Date(event.start_date)) {
+            return errorResponse(res,"Event already started,now cannot cancel the event",400);
+        }
+
+        await event.update({
+            status : "cancelled"
+        });
+
+        return successResponse(res,"Event cancelled successfully",200);
+    } catch (error) {
+        return errorResponse(res, "Internal server error",500);
+    }
+} 

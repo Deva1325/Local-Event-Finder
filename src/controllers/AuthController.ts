@@ -304,7 +304,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       reset_password_expiry: reset_token_expiry
     });
 
-    const resetPassword_Link = `http://localhost:${ENV.PORT}/api/auth/reset-password?token=${reset_token}`;
+    const resetPassword_Link = `${ENV.BASE_URL}/api/auth/reset-password?token=${reset_token}`;
 
     console.log(resetPassword_Link);
 
