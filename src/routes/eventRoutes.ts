@@ -10,6 +10,7 @@ router.get("/",getAllEvent);
 router.get("/:id",getEventById);
 router.post("/create",bearerToken,authorizeRoles("organizer"),upload.single("image"),createEvent);
 router.put("/:id",bearerToken,authorizeRoles("organizer"),upload.single("image"),updateEvent);
+router.put("/cancel/:id",bearerToken,authorizeRoles("organizer"),updateEvent);
 router.delete("/:id",bearerToken,authorizeRoles("organizer"),deleteEvent);
 
 export default router;

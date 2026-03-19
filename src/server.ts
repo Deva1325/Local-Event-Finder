@@ -9,6 +9,7 @@ import  eventRoutes from "./routes/eventRoutes";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./core/AppSwagger.json";
 import cors from "cors";
+import { eventCron } from "./utils/eventCron";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true })); // Handles standard forms
 // });
 
 connectDB();
+eventCron(); 
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/auth",authRoutes);
