@@ -56,6 +56,34 @@ export const createEvent = async (req:Request,res : Response) => {
   }
 }
 
+
+export const getAllEvent = async (req:Request,res:Response) => {
+    try {
+        const events = await EventModel.findAll({ where : {deleted_at : null} });
+        
+        return successResponse(res,"All Events fetched successfully!",events,200);
+    } catch (error) {
+        return errorResponse(res, "Internal server error",500);
+    }
+}
+
+export const getEventById = async (req:Request,res:Response) =>{
+    try {
+        const id = Number(req.params.id);
+
+        const event=await EventModel.findByPk(id);
+
+        if (!event) {
+            return errorResponse(res, "Event not found", 404);
+        }
+
+        return successResponse(res,"Event fetched successfully!",event,200);
+
+    } catch (error) {
+        return errorResponse(res, "Internal server error",500);
+    }
+}
+
 export const updateEvent = async (req:Request,res : Response) => {
     try {
     const user = (req as any).user;
@@ -109,33 +137,6 @@ export const updateEvent = async (req:Request,res : Response) => {
         available_seats : newAvailableSeats
     });    
         return successResponse(res, "Event updated successfully", event);
-
-    } catch (error) {
-        return errorResponse(res, "Internal server error",500);
-    }
-}
-
-export const getAllEvent = async (req:Request,res:Response) => {
-    try {
-        const events = await EventModel.findAll({ where : {deleted_at : null} });
-        
-        return successResponse(res,"All Events fetched successfully!",events,200);
-    } catch (error) {
-        return errorResponse(res, "Internal server error",500);
-    }
-}
-
-export const getEventById = async (req:Request,res:Response) =>{
-    try {
-        const id = Number(req.params.id);
-
-        const event=await EventModel.findByPk(id);
-
-        if (!event) {
-            return errorResponse(res, "Event not found", 404);
-        }
-
-        return successResponse(res,"Event fetched successfully!",event,200);
 
     } catch (error) {
         return errorResponse(res, "Internal server error",500);
