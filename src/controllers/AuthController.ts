@@ -72,7 +72,7 @@ export const register = async (req: Request, res: Response) => {
 
     await sendVerificationEmail(user.email, verificationLink);
 
-    return successResponse(res, "User registered successfully. Please check your email.", {
+    return successResponse(res, "User registered successfully, Please check your email", {
     user_id: user.user_id,
     name: user.name,
     email: user.email
@@ -109,7 +109,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (user.role === "organizer" && user.organizer_status !== "approved") {
-      return errorResponse(res, "Organizer account pending admin approval", 403);
+      return errorResponse(res, "Organizer account is not approved by admin", 403);
   }
 
     if (user.lock_until && new Date() < user.lock_until) {
@@ -138,9 +138,7 @@ export const login = async (req: Request, res: Response) => {
         lock_until: lock_until
       });
 
-      const msg = attempts >= 5
-        ? "Account locked for 30 minutes."
-        : `Invalid Password. Attempt ${attempts} of 5`;
+      const msg = attempts >= 5 ? "Account locked for 30 minutes.": `Invalid Password. Attempt ${attempts} of 5`;
       return errorResponse(res, msg, 400);
     }
 
@@ -169,8 +167,6 @@ export const login = async (req: Request, res: Response) => {
     return successResponse(res, "Login successful", { access_token: accessToken, refresh_token: refreshToken });
 
   } catch (error) {
-
-    console.error("Debug login error:", error);
     return errorResponse(res, "Internal server error");
   }
 }
@@ -204,10 +200,10 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       role: user.role
     });
 
-    return successResponse(res, "New Access Token generated!", { access_token: newAccessToken });
+    return successResponse(res, "New Access Token generated", { access_token: newAccessToken });
 
   } catch (error) {
-    console.error("Refresh Token Error:", error);
+    console.error("Refresh Token error:", error);
 
     return errorResponse(res, "Invalid or expired refresh token", 403);
 
@@ -271,7 +267,7 @@ export const logout = async (req: Request, res: Response) => {
     return successResponse(res, "Logout successful");
 
   } catch (error) {
-    console.error("Logout error:", error);
+    //console.error("Logout error:", error);
     return errorResponse(res, "Internal server error", 500);
   }
 }

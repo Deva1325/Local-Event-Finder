@@ -85,7 +85,7 @@ export const updateEvent = async (req:Request,res : Response) => {
             //if new total_seats are updated then
             if (total_seats!==undefined) { 
          if (total_seats < soldTickets) {
-        return errorResponse(res,`total_seats cannot be less than sold tickets (${soldTickets})`,400);
+        return errorResponse(res,`total_seats cannot be less than sold tickets`,400);
         }   
         newAvailableSeats=total_seats-soldTickets; 
     }
@@ -111,7 +111,33 @@ export const updateEvent = async (req:Request,res : Response) => {
         return successResponse(res, "Event updated successfully", event);
 
     } catch (error) {
-        console.error("update eventerror:", error);
-        return errorResponse(res, "Internal server error");
+        return errorResponse(res, "Internal server error",500);
+    }
+}
+
+export const getAllEvent = async (req:Request,res:Response) => {
+    try {
+        const events = await EventModel.findAll({ where : {deleted_at : null} });
+        
+        return successResponse(res,"All Events fetched successfully!",events,200);
+    } catch (error) {
+        return errorResponse(res, "Internal server error",500);
+    }
+}
+
+export const getEventById = async (req:Request,res:Response) =>{
+    try {
+        const id = Number(req.params.id);
+
+        const event=await EventModel.findByPk(id);
+
+        if (!event) {
+            return errorResponse(res, "Event not found", 404);
+        }
+
+        return successResponse(res,"Event fetched successfully!",event,200);
+
+    } catch (error) {
+        return errorResponse(res, "Internal server error",500);
     }
 }

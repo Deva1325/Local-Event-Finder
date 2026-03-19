@@ -4,6 +4,6 @@ import { adminBearerToken } from "../middleware/adminBearerToken";
 
 const router = express.Router();
 
-router.patch("/approve-organizer/:id",adminBearerToken,approveOrganizer);
+router.put("/verifyorganizer/:id",adminBearerToken,approveOrganizer);
 
 export default router;
