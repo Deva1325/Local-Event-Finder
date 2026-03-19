@@ -28,9 +28,7 @@ export const createEvent = async (req:Request,res : Response) => {
         let image_url=null;
 
         if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: "local_events_demo" 
-            });
+            const result = await cloudinary.uploader.upload(req.file.path, {folder: "local_events_demo" });
             image_url = result.secure_url; // the real https:// 
             //console.log("image_url:", image_url);
             
@@ -53,7 +51,7 @@ export const createEvent = async (req:Request,res : Response) => {
         return successResponse(res, "Event created successfully", event, 201);
 
     } catch (error) {
-        console.error("Create event error:", error);
+        console.error("create event error:", error);
         return errorResponse(res, "Internal server error");
   }
 }
@@ -68,7 +66,7 @@ export const updateEvent = async (req:Request,res : Response) => {
     if (!event) {
         return errorResponse(res, "Event not found", 404);
     }
-    //check for ownership
+    //check for valid organizer
     if (event.organizer_id!==user.user_id) {
         return errorResponse(res,"You can only update your own events",403);
     }
@@ -92,11 +90,18 @@ export const updateEvent = async (req:Request,res : Response) => {
         newAvailableSeats=total_seats-soldTickets; 
     }
 
+    let updateimg=event.image_url;
+
+    if (req.file) {
+        const result=await cloudinary.uploader.upload(req.file.path,{ folder : "local_events_demo" });
+        updateimg=result.secure_url;
+    }
+
     await event.update({
         title : title ?? event.title,
         description: description ?? event.description,
         location: location ?? event.location,
-        image_url: image_url ?? event.image_url,
+        image_url: updateimg,
         event_date: event_date ?? event.event_date,
         event_time: event_time ?? event.event_time,
         ticket_price: ticket_price ?? event.ticket_price,
@@ -106,7 +111,7 @@ export const updateEvent = async (req:Request,res : Response) => {
         return successResponse(res, "Event updated successfully", event);
 
     } catch (error) {
-        console.error("Update eventerror:", error);
+        console.error("update eventerror:", error);
         return errorResponse(res, "Internal server error");
     }
 }

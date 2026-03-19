@@ -17,7 +17,7 @@ export const adminBearerToken = async (req: Request, res: Response, next: NextFu
 
         if (!token) {
             return res.status(401).json({
-                message: "Access Token missing"
+                message: "Access token missing"
             });
         }
 
@@ -25,7 +25,7 @@ export const adminBearerToken = async (req: Request, res: Response, next: NextFu
 
         if (decoded.role !== "admin") {
             return res.status(403).json({
-                message: "Access denied, admins only."
+                message: "Access denied, only admin allowed."
             });
         }
 

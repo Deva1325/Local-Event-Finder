@@ -13,16 +13,16 @@ export const authorizeRoles = (...roles:string[])=>{
         }
 
         if (!roles.includes(user.role)) {
-            return res.status(403).json({ message: "Access denied, required roles: " + roles.join(", ") });
+            return res.status(403).json({ message: "Access denied, You don't have permission to access this" + roles.join(", ") });
         }
 
         if (roles.includes("organizer") && user.organizer_status!=="approved") {
             return res.status(403).json({
-                message : "Organizer not approved by"
+                message : "Organizer request is not approved by admin"
             });
         }
 
-        console.log("USER FROM TOKEN:", user);
+        console.log("User from token:", user);
         next();
 
         

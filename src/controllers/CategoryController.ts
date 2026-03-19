@@ -8,7 +8,7 @@ export const createCategory = async (req: Request, res: Response) => {
         const { name, description } = req.body;
 
         if (isEmpty(name)) {
-            return errorResponse(res, "Category Name is requires", 400);
+            return errorResponse(res, "Category Name is required", 400);
         }
 
         const existingCategory = await CategoryModel.findOne({
@@ -26,7 +26,7 @@ export const createCategory = async (req: Request, res: Response) => {
         return successResponse(res, "Category created successfully!", category, 201);
 
     } catch (error) {
-        console.error("Create Category Error", error);
+        console.error("Error while creating category", error);
 
 
         return errorResponse(res, "Internal Server Error", 500);
@@ -43,7 +43,7 @@ export const getCategory = async (req: Request, res: Response) => {
         return successResponse(res, "Catgories fetched Successfully!", categories, 200);
 
     } catch (error) {
-        console.error("Get Categories Error:", error);
+        console.error("Error while get all categories:", error);
         return errorResponse(res, "Internal Server Error", 500);
     }
 }
@@ -61,7 +61,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
         return successResponse(res, "Catgory fetched Successfully!", category, 200);
 
     } catch (error) {
-        console.error("Get Categories Error:", error);
+        console.error("Error while get specific category:", error);
         return errorResponse(res, "Internal Server Error", 500);
     }
 }
