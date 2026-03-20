@@ -17,7 +17,7 @@ export const eventCron = () => {
                 const end_date=new Date(event.end_date);
                 //console.log("end_date ", end_date);
                 
-                if (event.status=="draft" && today>=start_date) {
+                if (event.status=="draft" && today>=start_date) {   
                     await event.update({status : "published"});
                     //console.log(" event.status ",event.status);
                 }

@@ -11,6 +11,7 @@ export const ENV = {
   DB_NAME: process.env.DB_NAME || "local_event_finder",
   DB_PORT: Number(process.env.DB_PORT) || 3306,
   BASE_URL: process.env.BASE_URL || "http://localhost:3000",
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://192.168.1.115:3000",
 
   JWT_SECRET: process.env.JWT_SECRET || "secret",
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "refreshsecret",

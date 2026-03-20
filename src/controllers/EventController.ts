@@ -3,7 +3,6 @@ import EventModel  from "../models/EventModel";
 import { successResponse,errorResponse } from "../utils/response";
 import { isEmpty } from "../utils/validator";
 import cloudinary from "../config/cloudinary";
-import { endianness } from "node:os";
 
 
 export const createEvent = async (req:Request,res : Response) => {
@@ -13,7 +12,8 @@ export const createEvent = async (req:Request,res : Response) => {
         
         const user = (req as any).user;
 
-        const { category_id,title,description,location,start_date,end_date,event_time,ticket_price,total_seats } = req.body;
+        const { category_id,title,description,location,start_date,
+            end_date,event_time,ticket_price,total_seats } = req.body;
 
         if (isEmpty(title) || isEmpty(category_id) || isEmpty(start_date) || isEmpty(ticket_price) || isEmpty(total_seats) ) {
             return errorResponse(res, "Required fields are missing", 400);
@@ -63,7 +63,24 @@ export const createEvent = async (req:Request,res : Response) => {
 
 export const getAllEvent = async (req:Request,res:Response) => {
     try {
-        const events = await EventModel.findAll({ where : {deleted_at : null} });
+        
+        const { category_id,sort } = req.query;
+        
+        let filtercategory : any = {};
+        let date_order : any = [];
+
+        if (category_id) {
+            filtercategory.category_id=category_id;
+        }
+
+        if (sort=="asc") {
+            date_order = [["start_date","ASC"]]
+        }else if (sort=="asc") {
+            date_order = [["start_date","ASC"]]
+        }
+
+        //const events = await EventModel.findAll({ where : {deleted_at : null} });
+        const events = await EventModel.findAll({ where : filtercategory, order : date_order });
         
         return successResponse(res,"All Events fetched successfully!",events,200);
     } catch (error) {
@@ -167,6 +184,8 @@ export const deleteEvent = async (req:Request,res:Response) => {
         return successResponse(res,"Event deleted successfully",event,200);
 
     } catch (error) {
+        console.log("event delete error");
+        
         return errorResponse(res, "Internal server error",500);
     }
 }

@@ -133,8 +133,10 @@ EventModel.init(
   {
     sequelize: sequelize_db,
     tableName: "events",
-    timestamps: false,
+    timestamps: true,
     paranoid: true,
+    createdAt : "created_datetime",
+    updatedAt : false,
     deletedAt: "deleted_at"
   }
 );

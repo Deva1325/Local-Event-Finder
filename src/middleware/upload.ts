@@ -1,7 +1,7 @@
 import multer  from "multer";
 
 const upload = multer({
-    dest : "uploads/", // temporary storage
+    dest : "uploads/", // temp storage
 });
 
 export default upload;
