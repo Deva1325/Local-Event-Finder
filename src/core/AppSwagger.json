@@ -390,6 +390,129 @@
           }
         }
       }
+    },
+
+    "/events": {
+      "post": {
+        "summary": "Create new event (Organizer only)",
+        "tags": ["Events"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category_id": { "type": "integer" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "location": { "type": "string" },
+                  "start_date": { "type": "string", "format": "date" },
+                  "end_date": { "type": "string", "format": "date" },
+                  "event_time": { "type": "string" },
+                  "ticket_price": { "type": "number" },
+                  "total_seats": { "type": "integer" },
+                  "image": { "type": "string", "format": "binary" }
+                },
+                "required": ["category_id", "title", "start_date", "ticket_price", "total_seats"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Event created" } }
+      },
+      "get": {
+        "summary": "Get all events",
+        "tags": ["Events"],
+        "parameters": [
+          { "name": "category_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] } }
+        ],
+        "responses": { "200": { "description": "Success" } }
+      }
+    },
+
+    "/events/{id}": {
+      "get": {
+        "summary": "Get event by ID",
+        "tags": ["Events"],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Success" } }
+      },
+      "put": {
+        "summary": "Update event (Organizer only)",
+        "tags": ["Events"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "total_seats": { "type": "integer" },
+                  "image": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Event updated" } }
+      },
+      "delete": {
+        "summary": "Delete event",
+        "tags": ["Events"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Event deleted" } }
+      }
+    },
+
+    "/events/{id}/cancel": {
+      "put": {
+        "summary": "Cancel an event",
+        "tags": ["Events"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Event cancelled" } }
+      }
+    },
+
+    "/bookings": {
+      "post": {
+        "summary": "Book tickets for an event",
+        "tags": ["Bookings"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event_id": { "type": "integer" },
+                  "ticket_quantity": { "type": "integer" }
+                },
+                "required": ["event_id", "ticket_quantity"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Booking created" } }
+      }
+    },
+    
+    "/bookings/{id}/cancel": {
+      "put": {
+        "summary": "Cancel a booking",
+        "tags": ["Bookings"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Booking cancelled" } }
+      }
     }
 
   }

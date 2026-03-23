@@ -60,7 +60,6 @@ export const createEvent = async (req:Request,res : Response) => {
   }
 }
 
-
 export const getAllEvent = async (req:Request,res:Response) => {
     try {
         

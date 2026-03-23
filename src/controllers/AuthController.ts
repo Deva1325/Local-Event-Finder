@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../core/JWT";
 import { generateToken } from "../utils/helpers";
 import { ENV } from "../config/env";
-import { sendVerificationEmail } from "../utils/notification";
+import { sendVerificationEmail,sendForgotPasswordEmail } from "../utils/notification";
 import { successResponse, errorResponse } from "../utils/response";
 
 export const register = async (req: Request, res: Response) => {
@@ -305,11 +305,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
       reset_password_expiry: reset_token_expiry
     });
 
-    const resetPassword_Link = `${ENV.BASE_URL}/api/auth/reset-password?token=${reset_token}`;
+    //const resetPassword_Link = `${ENV.BASE_URL}/api/auth/reset-password?token=${reset_token}`;
+    const resetPassword_Link = `${ENV.FRONTEND_URL}/reset-password?token=${reset_token}`;
 
     console.log(resetPassword_Link);
 
-    await sendVerificationEmail(user.email, resetPassword_Link);
+    await sendForgotPasswordEmail(user.email, resetPassword_Link);
 
     return successResponse(res, "Reset Password link sent to the email");
 
@@ -319,7 +320,6 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
   }
 }
-
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {

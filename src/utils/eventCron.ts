@@ -5,7 +5,7 @@ import { errorResponse } from "./response";
 export const eventCron = () => {
     cron.schedule("* * * * *",async () => {
         try {
-            console.log("start cron");
+           // console.log("start cron");
             
             const events=await EventModel.findAll();
             const today=new Date();

@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import  adminRoutes from "./routes/adminRoutes";
 import  eventRoutes from "./routes/eventRoutes";
+import bookingRoutes from "./routes/bookingRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./core/AppSwagger.json";
@@ -16,7 +17,8 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Handles standard forms
+app.use(express.urlencoded({ extended: true })); 
+// Handles standard forms
 
 // app.get('/',(req,res)=>{
 //     res.send("Local Event Finder API running...");
@@ -30,11 +32,12 @@ app.use("/api/auth",authRoutes);
 app.use("/api/categories",categoryRoutes);
 app.use("/api/admin",adminRoutes);
 app.use("/api/events",eventRoutes);
+app.use("/api/bookings",bookingRoutes);
 
 
 const PORT = Number(ENV.PORT) || 3000;
 
 app.listen(PORT,'0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
-    console.log(`Network: http://192.168.1.103:${PORT}`); // Double check this IP!
-});
+    //console.log(`Network: http://192.168.1.103:${PORT}`);
+});     
