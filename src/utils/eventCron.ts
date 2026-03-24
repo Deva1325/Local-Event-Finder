@@ -11,22 +11,27 @@ export const eventCron = () => {
             const today=new Date();
 
             for (const event of events) {
-                const start_date=new Date(event.start_date); // converrt db date into js date for calcuate
+                const bookingStart=new Date(event.booking_start_date);
+                const event_start_date=new Date(event.start_date); // converrt db date into js date for calcuate
                 //console.log("start_date ", start_date);
-                
-                const end_date=new Date(event.end_date);
+                const event_end_date=new Date(event.end_date);
                 //console.log("end_date ", end_date);
                 
-                if (event.status=="draft" && today>=start_date) {   
+                if (event.status==="draft" && today>=bookingStart) {   
                     await event.update({status : "published"});
                     //console.log(" event.status ",event.status);
                 }
 
 
-                if (event.status=="published" && today>end_date) {
-                    await event.update({status : "completed"});
+                if (event.status==="published" && today>=event_start_date) {
+                    await event.update({status : "ongoing"});
                      //console.log(" event.status ",event.status);
                 }
+
+                if (event.status!=="completed" && today>event_end_date) {
+                    await event.update({ status : 'completed' });
+                }
+
             }
         } catch (error) {
             return errorResponse(null,"Internal server error",500);

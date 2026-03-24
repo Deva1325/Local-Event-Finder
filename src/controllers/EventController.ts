@@ -13,9 +13,10 @@ export const createEvent = async (req:Request,res : Response) => {
         const user = (req as any).user;
 
         const { category_id,title,description,location,start_date,
-            end_date,event_time,ticket_price,total_seats } = req.body;
+            end_date,event_time,ticket_price,total_seats,booking_start_date,booking_end_date } = req.body;
 
-        if (isEmpty(title) || isEmpty(category_id) || isEmpty(start_date) || isEmpty(ticket_price) || isEmpty(total_seats) ) {
+        if (isEmpty(title) || isEmpty(category_id) || isEmpty(start_date) || isEmpty(ticket_price) 
+            || isEmpty(total_seats) || isEmpty(booking_start_date) || isEmpty(booking_end_date)) {
             return errorResponse(res, "Required fields are missing", 400);
         }
         if (Number(total_seats)<=0) {
@@ -28,6 +29,11 @@ export const createEvent = async (req:Request,res : Response) => {
         if (new Date(end_date) < new Date(start_date)) {
             return errorResponse(res, "End date cannot be before start date", 400);
         }
+
+        if (new Date(booking_end_date) < new Date(booking_start_date)) {
+            return errorResponse(res, "Booking end date cannot be before booking start date", 400);
+        }
+
         let image_url=null;
 
         if (req.file) {
@@ -50,6 +56,8 @@ export const createEvent = async (req:Request,res : Response) => {
             ticket_price,
             total_seats,
             available_seats: total_seats,
+            booking_start_date,
+            booking_end_date,
             status : "draft"
         });
         return successResponse(res, "Event created successfully", event, 201);

@@ -5,7 +5,7 @@ import {createBooking,cancelBooking,getMyBookings} from "../controllers/BookingC
 const router=express.Router();
 
 router.post('/',bearerToken,createBooking);
-router.put('/cancel',bearerToken,cancelBooking);
+router.put('/cancel/:id',bearerToken,cancelBooking);
 router.get('/mybookings',bearerToken,getMyBookings);
 
 //console.log("Hello from booking routes");

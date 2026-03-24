@@ -7,6 +7,8 @@ interface EventAttributes {
     category_id: number;
     title: string;
     image_url: string | null;
+    booking_start_date: Date,
+    booking_end_date: Date,
     description: string | null;
     location: string | null;
     start_date: Date;
@@ -15,7 +17,7 @@ interface EventAttributes {
     ticket_price: number;
     total_seats: number;
     available_seats: number;
-    status: "draft" | "published" | "cancelled" | "completed";
+    status: "draft" | "published" | "ongoing" | "cancelled" | "completed";
     created_datetime: Date;
     deleted_at: Date | null;
 }
@@ -34,6 +36,8 @@ implements EventAttributes
     public category_id!: number;
     public title!: string;
     public image_url!: string | null;
+    public booking_start_date!: Date;
+    public booking_end_date!: Date;
     public description!: string | null;
     public location!: string | null;
     public start_date!: Date;
@@ -42,7 +46,7 @@ implements EventAttributes
     public ticket_price!: number;
     public total_seats!: number;
     public available_seats!: number;
-    public status!: "draft" | "published" | "cancelled" | "completed";
+    public status!: "draft" | "published" | "ongoing" |  "cancelled" | "completed";
     public created_datetime!: Date;
     public deleted_at!: Date | null;
 }    
@@ -72,6 +76,16 @@ EventModel.init(
     image_url: {
       type: DataTypes.STRING(255),
       allowNull: true
+    },
+
+    booking_start_date: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+
+    booking_end_date: {
+      type: DataTypes.DATE,
+      allowNull: false
     },
 
     description: {
@@ -114,7 +128,7 @@ EventModel.init(
     },
 
     status: {
-      type: DataTypes.ENUM("draft", "published", "cancelled", "completed"),
+      type: DataTypes.ENUM("draft", "published", "ongoing" ,"cancelled", "completed"),
       allowNull: false,
       defaultValue : "draft"
     },
