@@ -82,8 +82,8 @@ export const getAllEvent = async (req:Request,res:Response) => {
 
         if (sort=="asc") {
             date_order = [["start_date","ASC"]]
-        }else if (sort=="asc") {
-            date_order = [["start_date","ASC"]]
+        }else if (sort=="desc") {
+            date_order = [["start_date","DESC"]]
         }
 
         //const events = await EventModel.findAll({ where : {deleted_at : null} });

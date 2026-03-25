@@ -22,6 +22,13 @@ export const createReview = async (req:Request,res:Response) => {
         if (rating<1 || rating>5) {
             return errorResponse(res,"Rating must be between 1  to 5",400);
         }
+        
+        const event= await EventModel.findByPk(event_id);
+        
+        if (!event) {
+            return errorResponse(res,"Event Not Found",400);
+        }
+
         const existingReview = await ReviewModel.findOne({ where : { user_id,event_id } });
 
         if (existingReview) {
@@ -48,7 +55,7 @@ export const getReviewsByEvent=async (req:Request,res:Response) => {
     try {
         const event_id=Number(req.params.event_id);
 
-        if (isNumber(event_id)) {
+        if (!isNumber(event_id)) {
             return errorResponse(res,"Invalid event id",400);
         }
 
@@ -78,7 +85,7 @@ export const updateReview = async (req:Request,res:Response) => {
 
         const review_id=Number(req.params.review_id);
 
-        if (isNumber(review_id)) {
+        if (!isNumber(review_id)) {
             return errorResponse(res,"Invalid review id",400);
         }
 
@@ -109,7 +116,7 @@ export const deleteReview = async (req:Request,res:Response) => {
 
         const review_id=Number(req.params.review_id);
 
-        if (isNumber(review_id)) {
+        if (!isNumber(review_id)) {
             return errorResponse(res,"Invalid review id",400);
         }
 

@@ -44,10 +44,12 @@ export const createBooking = async (req:Request,res : Response) => {
         }
 
         if (event.status!=='published' && event.status!=='ongoing') {
+            await transaction.rollback();   
             return errorResponse(res,"Booking allow only for published events",400);
         }
 
         if (event.available_seats<ticket_quantity) {
+            await transaction.rollback();
             return errorResponse(res,"No enough seats available",400);
         }
 
@@ -135,8 +137,8 @@ export const getMyBookings = async (req:Request,res:Response) => {
         const mybookings=await BookingModel.findAll({ where : { user_id : user.user_id }});
         //console.log("mybookings: ",mybookings);
         
-        if (!mybookings) {
-            return errorResponse(res,"User not found",400);
+        if (mybookings.length===0) {
+            return errorResponse(res,"No bookings found for this user",404);
         }
 
         return successResponse(res,"Booking fetched successfully",mybookings,200);
