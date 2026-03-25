@@ -6,11 +6,13 @@ import categoryRoutes from "./routes/categoryRoutes";
 import  adminRoutes from "./routes/adminRoutes";
 import  eventRoutes from "./routes/eventRoutes";
 import bookingRoutes from "./routes/bookingRoutes";
+import reviewRoutes from "./routes/reviewRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./core/AppSwagger.json";
 import cors from "cors";
 import { eventCron } from "./utils/eventCron";
+import "./models";
 
 const app = express();
 
@@ -33,6 +35,7 @@ app.use("/api/categories",categoryRoutes);
 app.use("/api/admin",adminRoutes);
 app.use("/api/events",eventRoutes);
 app.use("/api/bookings",bookingRoutes);
+app.use("/api/reviews",reviewRoutes);
 
 
 const PORT = Number(ENV.PORT) || 3000;

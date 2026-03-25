@@ -13,3 +13,11 @@ export const isEmpty = (value: string): boolean => {
   return false;
 };
 
+export const isNumber = (value : any): boolean =>{
+  const num=Number(value);
+    return !isNaN(num);
+  // if (isNaN(num)) {
+  //   return false;
+  // }
+  //  return true; 
+}

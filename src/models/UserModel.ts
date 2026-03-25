@@ -1,5 +1,6 @@
 import { Model, DataTypes, Optional } from "sequelize";
 import { sequelize_db } from "../config/db";
+import ReviewModel from "./ReviewModel";
 
 interface UserAttributes {
     user_id : number;
@@ -167,4 +168,6 @@ UserModel.init(
 } 
 );
 
+
 export default UserModel;
+
