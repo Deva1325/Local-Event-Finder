@@ -37,4 +37,16 @@ export const ENV = {
  "password": "123456"
 }
 
+{
+  "email": "abhay@yopmail.com",
+  "password": "123456"
+}
+*/
+
+/*
+{
+  "email": "admin@eventfinder.com",
+  "password": "admin@123"
+}
+
 */

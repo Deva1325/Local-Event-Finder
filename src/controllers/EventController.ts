@@ -3,6 +3,8 @@ import EventModel  from "../models/EventModel";
 import { successResponse,errorResponse } from "../utils/response";
 import { isEmpty } from "../utils/validator";
 import cloudinary from "../config/cloudinary";
+import { ReviewModel } from "../models";
+import { sequelize_db } from "../config/db";
 
 
 export const createEvent = async (req:Request,res : Response) => {
@@ -105,7 +107,25 @@ export const getEventById = async (req:Request,res:Response) =>{
             return errorResponse(res, "Event not found", 404);
         }
         
-        return successResponse(res,"Event fetched successfully!",event,200);
+        const avg=await ReviewModel.findOne({ 
+            attributes: [
+                [sequelize_db.fn("AVG",sequelize_db.col("rating")),"avg_rating"]
+            ],
+            where: { event_id : id},
+            raw: true
+            // plain json data 
+         }) as any;
+
+        const totalReviews=await ReviewModel.count({ where : {event_id:id} });
+
+        return successResponse(res,"Event fetched successfully",{
+            ...event.toJSON(),
+            average_rating: Number(avg?.avg_rating || 0).toFixed(1),
+            totalReviews: totalReviews
+         });
+
+      
+       // return successResponse(res,"Event fetched successfully!",event,200);
 
     } catch (error) {
         return errorResponse(res, "Internal server error",500);

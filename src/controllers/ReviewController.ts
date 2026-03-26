@@ -3,6 +3,7 @@ import { successResponse,errorResponse } from "../utils/response";
 import ReviewModel  from "../models/ReviewModel";
 import EventModel  from "../models/EventModel";
 import { isEmpty,isNumber } from "../utils/validator";
+import BookingModel from "../models/BookingModel";
 
 export const createReview = async (req:Request,res:Response) => {
     try {
@@ -29,6 +30,17 @@ export const createReview = async (req:Request,res:Response) => {
             return errorResponse(res,"Event Not Found",400);
         }
 
+        if (event.status!=="ongoing" && event.status!=="completed") {
+            return errorResponse(res,"You can review the event only after event start",400);
+        }
+
+        const userBooking = await BookingModel.findOne({ 
+            where : { user_id, event_id , booking_status:"confirmed" } });
+
+        if (!userBooking) {
+            return errorResponse(res,"You cannot give reivew without attend the event",400);
+        }
+
         const existingReview = await ReviewModel.findOne({ where : { user_id,event_id } });
 
         if (existingReview) {
@@ -49,7 +61,7 @@ export const createReview = async (req:Request,res:Response) => {
         
         return errorResponse(res,"Internal server error",500);
     }
-}
+}   
 
 export const getReviewsByEvent=async (req:Request,res:Response) => {
     try {
@@ -134,4 +146,4 @@ export const deleteReview = async (req:Request,res:Response) => {
         console.log(error);
         return errorResponse(res,"Internal server error",500);
     }
-}
+}   
