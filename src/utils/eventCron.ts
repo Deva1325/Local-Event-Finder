@@ -34,6 +34,8 @@ export const eventCron = () => {
 
             }
         } catch (error) {
+            console.log("EventCron Error ",error);
+            
             return errorResponse(null,"Internal server error",500);
         }
     })

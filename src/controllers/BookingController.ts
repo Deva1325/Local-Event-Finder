@@ -4,6 +4,7 @@ import EventModel from "../models/EventModel";
 import { successResponse,errorResponse } from "../utils/response";
 import { sequelize_db } from "../config/db";
 import { isEmpty } from "../utils/validator";
+import { logAudit } from "../utils/auditLogger";
 
 export const createBooking = async (req:Request,res : Response) => {
     
@@ -71,6 +72,16 @@ export const createBooking = async (req:Request,res : Response) => {
         }, { transaction });
 
         await transaction.commit();
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Booking_Created",
+            entity_type: "Booking",
+            entity_id: booking.booking_id,
+            description: `User booked ${ticket_quantity} tickets for Event ID: ${event_id}`,
+            ip_address: req.ip || null
+        });
+
         return successResponse(res,"Event booked successfully",booking,201);
 
     } catch (error) {
@@ -92,7 +103,7 @@ export const cancelBooking = async (req:Request,res: Response) => {
         transaction=await sequelize_db.transaction();
 
         const booking=await BookingModel.findByPk(booking_id, {transaction});
-        console.log("booking ",booking);
+        //console.log("booking ",booking);
         
 
         if (!booking) {
@@ -120,6 +131,15 @@ export const cancelBooking = async (req:Request,res: Response) => {
         }, { transaction });
 
         await transaction.commit();
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Booking_Cancelled",
+            entity_type: "Booking",
+            entity_id: booking.booking_id,
+            description: `User cancelled booking for Event ID: ${booking.event_id}`,
+            ip_address: req.ip || null
+        });
 
         return successResponse(res,"Event cancelled successfully!",booking,200);
 

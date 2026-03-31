@@ -4,6 +4,7 @@ import ReviewModel  from "../models/ReviewModel";
 import EventModel  from "../models/EventModel";
 import { isEmpty,isNumber } from "../utils/validator";
 import BookingModel from "../models/BookingModel";
+import { logAudit } from "../utils/auditLogger";
 
 export const createReview = async (req:Request,res:Response) => {
     try {
@@ -53,6 +54,15 @@ export const createReview = async (req:Request,res:Response) => {
             rating,
             review_text
         });
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Review_Created",
+            entity_type: "Review",
+            entity_id: review.review_id,
+            description: `User added a ${rating}-star review for Event ID: ${event_id}`,
+            ip_address: req.ip || null
+});
 
         return successResponse(res,"Review added succesfully!",review,201);
 
@@ -114,6 +124,15 @@ export const updateReview = async (req:Request,res:Response) => {
            review_text 
         });
 
+        await logAudit({
+            user_id: user.user_id,
+            action: "Review_Updated",
+            entity_type: "Review",
+            entity_id: review.review_id,
+            description: `User updated a ${rating}-star review for Event ID: ${review.event_id}`,
+            ip_address: req.ip || null
+        });
+
         return successResponse(res,"Review updated successfully!",review,200);
     } catch (error) {
         console.log("Update review error",error);
@@ -139,6 +158,15 @@ export const deleteReview = async (req:Request,res:Response) => {
         }
 
         await review.destroy();
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Review_Deleted",
+            entity_type: "Review",
+            entity_id: review.review_id,
+            description: `User deleted a review for Event ID: ${review.event_id}`,
+            ip_address: req.ip || null
+        });
 
         return successResponse(res,"Review deleted successfully",200);
 

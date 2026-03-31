@@ -413,21 +413,34 @@
                   "event_time": { "type": "string" },
                   "ticket_price": { "type": "number" },
                   "total_seats": { "type": "integer" },
+                  "booking_start_date": { "type": "string", "format": "date", "description": "Date when ticket sales start" },
+                  "booking_end_date": { "type": "string", "format": "date", "description": "Date when ticket sales end" },
                   "image": { "type": "string", "format": "binary" }
                 },
-                "required": ["category_id", "title", "start_date", "ticket_price", "total_seats"]
+                "required": [
+                  "category_id", 
+                  "title", 
+                  "start_date", 
+                  "ticket_price", 
+                  "total_seats", 
+                  "booking_start_date", 
+                  "booking_end_date"
+                ]
               }
             }
           }
         },
-        "responses": { "201": { "description": "Event created" } }
+        "responses": { 
+          "201": { "description": "Event created successfully in draft status" },
+          "400": { "description": "Validation error (e.g. end date before start date)" }
+        }
       },
       "get": {
         "summary": "Get all events",
         "tags": ["Events"],
         "parameters": [
           { "name": "category_id", "in": "query", "schema": { "type": "integer" } },
-          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] } }
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] }, "description": "Sort by start_date" }
         ],
         "responses": { "200": { "description": "Success" } }
       }
@@ -435,13 +448,13 @@
 
     "/events/{id}": {
       "get": {
-        "summary": "Get event by ID",
+        "summary": "Get event by ID with average rating",
         "tags": ["Events"],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Success" } }
+        "responses": { "200": { "description": "Success - returns event details with average_rating and totalReviews" } }
       },
       "put": {
-        "summary": "Update event (Organizer only)",
+        "summary": "Update event (Organizer only - Draft status only)",
         "tags": ["Events"],
         "security": [{"bearerAuth": []}],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
@@ -453,6 +466,11 @@
                 "properties": {
                   "title": { "type": "string" },
                   "description": { "type": "string" },
+                  "location": { "type": "string" },
+                  "start_date": { "type": "string", "format": "date" },
+                  "end_date": { "type": "string", "format": "date" },
+                  "event_time": { "type": "string" },
+                  "ticket_price": { "type": "number" },
                   "total_seats": { "type": "integer" },
                   "image": { "type": "string", "format": "binary" }
                 }
@@ -460,24 +478,21 @@
             }
           }
         },
-        "responses": { "200": { "description": "Event updated" } }
+        "responses": { 
+          "200": { "description": "Event updated successfully" },
+          "400": { "description": "Cannot update: status not draft or seat reduction conflict" },
+          "403": { "description": "Unauthorized to update this event" }
+        }
       },
       "delete": {
         "summary": "Delete event",
         "tags": ["Events"],
         "security": [{"bearerAuth": []}],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Event deleted" } }
-      }
-    },
-
-    "/events/{id}/cancel": {
-      "put": {
-        "summary": "Cancel an event",
-        "tags": ["Events"],
-        "security": [{"bearerAuth": []}],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Event cancelled" } }
+        "responses": { 
+          "200": { "description": "Event deleted successfully" },
+          "403": { "description": "Unauthorized to delete this event" }
+        }
       }
     },
 
@@ -608,7 +623,69 @@
           "404": { "description": "Review not found" }
         }
       }
+    },
+    "/admin/organizer/{id}/approve": {
+      "put": {
+        "summary": "Approve an organizer application",
+        "tags": ["Admin"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Organizer approved successfully" },
+          "400": { "description": "User is not an organizer or already processed" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+
+    "/admin/organizer/{id}/reject": {
+      "put": {
+        "summary": "Reject an organizer application",
+        "tags": ["Admin"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Organizer rejected successfully" },
+          "400": { "description": "User is not an organizer or already processed" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+
+    "/organizer/dashboard": {
+      "get": {
+        "summary": "Get comprehensive dashboard statistics for the logged-in organizer",
+        "tags": ["Organizer"],
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Dashboard statistics fetched successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Details fetched successfully!",
+                  "data": {
+                    "total_Events": 5,
+                    "total_Sold_Tickets": 120,
+                    "total_revenue": 5000.50,
+                    "upcoming_events": [],
+                    "pastEvents": []
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized User" },
+          "403": { "description": "Forbidden - Only organizers allowed" }
+        }
+      }
     }
+    
 
   }
 }

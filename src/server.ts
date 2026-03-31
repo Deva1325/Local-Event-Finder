@@ -7,6 +7,7 @@ import  adminRoutes from "./routes/adminRoutes";
 import  eventRoutes from "./routes/eventRoutes";
 import bookingRoutes from "./routes/bookingRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
+import organizerRoutes from "./routes/OrganizerRoutes";
 
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./core/AppSwagger.json";
@@ -36,6 +37,7 @@ app.use("/api/admin",adminRoutes);
 app.use("/api/events",eventRoutes);
 app.use("/api/bookings",bookingRoutes);
 app.use("/api/reviews",reviewRoutes);
+app.use("/api/organizer",organizerRoutes);
 
 
 const PORT = Number(ENV.PORT) || 3000;

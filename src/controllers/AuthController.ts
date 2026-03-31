@@ -7,7 +7,8 @@ import { generateToken } from "../utils/helpers";
 import { ENV } from "../config/env";
 import { sendVerificationEmail,sendForgotPasswordEmail } from "../utils/notification";
 import { successResponse, errorResponse } from "../utils/response";
-
+import { logAudit } from '../utils/auditLogger';
+ 
 export const register = async (req: Request, res: Response) => {
   try { 
     const { name, email, password, phone,role } = req.body;
@@ -64,6 +65,15 @@ export const register = async (req: Request, res: Response) => {
     await user.update({
       verification_token: verificationToken,
       verification_token_expiry: expiry
+    });
+
+    await logAudit({
+      user_id: user.user_id,
+      action: "User_Registration",
+      entity_type: "User",
+      entity_id: user.user_id,
+      description: `New ${user.role} registered with email: ${user.email}`,
+      ip_address: req.ip || null
     });
 
     //const networkIP = "192.168.1.103"; 
@@ -165,6 +175,15 @@ export const login = async (req: Request, res: Response) => {
       refresh_token: refreshToken
     })
 
+    await logAudit({
+      user_id: user.user_id,
+      action: "User_Login",
+      entity_type: "User",
+      entity_id: user.user_id,
+      description: "User logged in successfully",
+      ip_address: req.ip || null
+    });
+
     return successResponse(res, "Login successful", { access_token: accessToken, refresh_token: refreshToken });
 
   } catch (error) {
@@ -237,6 +256,15 @@ export const verifyEmail = async (req: Request, res: Response) => {
       verification_token_expiry: null
     });
 
+    await logAudit({
+      user_id: user.user_id,
+      action: "Email_Verified",
+      entity_type: "User",
+      entity_id: user.user_id,
+      description: "User successfully verified with email address",
+      ip_address: req.ip || null
+    });
+
     return successResponse(res, "Email verified successfully");
 
   } catch (error) {
@@ -263,6 +291,15 @@ export const logout = async (req: Request, res: Response) => {
     //remove token from the db
     await user.update({
       refresh_token: null
+    });
+
+    await logAudit({
+      user_id: user.user_id,
+      action: "User_Logout",
+      entity_type: "User",
+      entity_id: user.user_id,
+      description: "User successfully logged out and cleared refresh token",
+      ip_address: req.ip || null
     });
 
     return successResponse(res, "Logout successful");
@@ -303,6 +340,15 @@ export const forgotPassword = async (req: Request, res: Response) => {
     await user.update({
       reset_password_token: reset_token,
       reset_password_expiry: reset_token_expiry
+    });
+
+    await logAudit({
+      user_id: user.user_id,
+      action: "Password_Reset_Requested",
+      entity_type: "User",
+      entity_id: user.user_id,
+      description: "User requested a password reset -> password reset token generated and sent to email",
+      ip_address: req.ip || null
     });
 
     //const resetPassword_Link = `${ENV.BASE_URL}/api/auth/reset-password?token=${reset_token}`;
@@ -347,6 +393,15 @@ export const resetPassword = async (req: Request, res: Response) => {
       password: hashedNewPassword,
       reset_password_token: null,
       reset_password_expiry: null
+    });
+
+    await logAudit({
+      user_id: user.user_id,
+      action: "Password_Reset",
+      entity_type: "User",
+      entity_id: user.user_id,
+      description: "User successfully reset their password via email token",
+      ip_address: req.ip || null
     });
 
     return successResponse(res, "Password Reset Successful!");

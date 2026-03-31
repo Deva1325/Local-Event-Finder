@@ -70,11 +70,48 @@ export const sendForgotPasswordEmail= async (email:string,resetLink:string) => {
     await sgMail.send(message);
 }
 
-/*        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <h2>Password Reset Request</h2>
-            <p>We received a request to reset your password. Click the button below to set a new one. <b>This link expires in 1 hour.</b></p>
-            <a href="${resetLink}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
-            <p>If you did not request this, please ignore this email.</p>
-        </div>
+export const sendApprovalEmail =async (email:string,name:string) => {
+    const message={
+        to:email,
+        from: ENV.SENDGRID_FROM_EMAIL as string,
+        subject: "Congratulations! Your Organizer Account is Approved",
+        html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <h2 style="color: #4CAF50; text-align: center;">Account Approved!</h2>
+            <p>Hello <b>${name}</b>,</p>
+            <p>We are excited to inform you that your application to become an organizer on <strong>Local Event Finder</strong> has been approved by our admin team.</p>
+            
+            <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;">
+                <p style="margin: 0;">You can now log in to your dashboard to start creating and managing events.</p>
+            </div>
 
-*/
+            <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+                Welcome to the community! We can't wait to see your events.
+            </p>
+        </div>
+        `,
+    }
+    await sgMail.send(message);
+}
+
+export const sendRejectionEmail=async (email:string,name:string) => {
+    const message={
+        to:email,
+        from: ENV.SENDGRID_FROM_EMAIL as string,
+        subject: "Update regarding your Organizer Application",
+        html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <h2 style="color: #f44336; text-align: center;">Application Update</h2>
+            <p>Hello <b>${name}</b>,</p>
+            <p>Thank you for your interest in joining Local Event Finder. After reviewing your application, we regret to inform you that we cannot approve your organizer account at this time.</p>
+            
+            <p>If you have any questions regarding this decision, please feel free to reach out to our support team.</p>
+
+            <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+                Best regards,<br>The Local Event Finder Team
+            </p>
+        </div>
+        `,
+    }
+    await sgMail.send(message);
+}

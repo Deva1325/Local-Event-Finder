@@ -5,6 +5,7 @@ import { isEmpty } from "../utils/validator";
 import cloudinary from "../config/cloudinary";
 import { ReviewModel } from "../models";
 import { sequelize_db } from "../config/db";
+import { logAudit } from "../utils/auditLogger";
 
 
 export const createEvent = async (req:Request,res : Response) => {
@@ -17,7 +18,7 @@ export const createEvent = async (req:Request,res : Response) => {
         const { category_id,title,description,location,start_date,
             end_date,event_time,ticket_price,total_seats,booking_start_date,booking_end_date } = req.body;
 
-        if (isEmpty(title) || isEmpty(category_id) || isEmpty(start_date) || isEmpty(ticket_price) 
+        if (isEmpty(title) || isEmpty(category_id) || isEmpty(start_date) || isEmpty(ticket_price) || isEmpty(event_time)
             || isEmpty(total_seats) || isEmpty(booking_start_date) || isEmpty(booking_end_date)) {
             return errorResponse(res, "Required fields are missing", 400);
         }
@@ -62,6 +63,16 @@ export const createEvent = async (req:Request,res : Response) => {
             booking_end_date,
             status : "draft"
         });
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Event_Created",
+            entity_type: "Event",
+            entity_id: event.event_id,
+            description: `Organizer created a new event: ${event.title}`,
+            ip_address: req.ip || null
+         });
+
         return successResponse(res, "Event created successfully", event, 201);
 
     } catch (error) {
@@ -184,6 +195,16 @@ export const updateEvent = async (req:Request,res : Response) => {
         total_seats: total_seats ?? event.total_seats,       
         available_seats : newAvailableSeats
     });    
+
+    await logAudit({
+            user_id: user.user_id,
+            action: "Event_Updated",
+            entity_type: "Event",
+            entity_id: event.event_id,
+            description: `Organizer updated event details for: ${event.title}`,
+            ip_address: req.ip || null
+         });
+
         return successResponse(res, "Event updated successfully", event);
 
     } catch (error) {
@@ -207,6 +228,15 @@ export const deleteEvent = async (req:Request,res:Response) => {
         }
 
         await event.destroy();
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Event_Deleted",
+            entity_type: "Event",
+            entity_id: event.event_id,
+            description: `Organizer deleted event: ${event.title}`,
+            ip_address: req.ip || null
+         });
 
         return successResponse(res,"Event deleted successfully",event,200);
 
@@ -241,6 +271,15 @@ export const cancelEvent = async (req:Request,res:Response) => {
         await event.update({
             status : "cancelled"
         });
+
+        await logAudit({
+            user_id: user.user_id,
+            action: "Event_Cancelled",
+            entity_type: "Event",
+            entity_id: event.event_id,
+            description: `Organizer cancelled event: ${event.title}`,
+            ip_address: req.ip || null
+         });
 
         return successResponse(res,"Event cancelled successfully",200);
     } catch (error) {

@@ -2,6 +2,10 @@ import { Request , Response } from "express";
 import { successResponse,errorResponse } from "../utils/response";
 import UserModel from "../models/UserModel"
 import { isNumber } from "../utils/validator";
+import { BookingModel, EventModel } from "../models";
+import { sequelize_db } from "../config/db";
+import { logAudit } from "../utils/auditLogger";
+import { sendApprovalEmail, sendRejectionEmail } from "../utils/notification";
 
 export const approveOrganizer = async (req: Request, res: Response) => {
     try {
@@ -11,6 +15,8 @@ export const approveOrganizer = async (req: Request, res: Response) => {
         if (!isNumber(user_id)) {
             return errorResponse(res,"Invalid User Id",400);
         }
+
+        const adminData = (req as any).user;
 
         const user=await UserModel.findByPk(user_id);
 
@@ -30,6 +36,17 @@ export const approveOrganizer = async (req: Request, res: Response) => {
            organizer_status : "approved" 
         });
 
+        await sendApprovalEmail(user.email,user.name);
+
+        await logAudit({
+              user_id:  adminData.user_id,
+              action: "Approve_Organizer",
+              entity_type: "User",
+              entity_id: user.user_id,
+              description: `Admin ${adminData.email} approved organizer ${user.email}`,
+              ip_address: req.ip || null
+            });
+
         return successResponse(res, "Organizer approved successfully");
 
         } catch (error) {
@@ -44,6 +61,9 @@ export const rejectOrganizer = async (req:Request,res:Response) => {
         if (!isNumber(user_id)) {
             return errorResponse(res,"Invalid User id",400);
         }
+
+        const adminData=(req as any).user;
+
         const user=await UserModel.findByPk(user_id);
 
         if (!user) {
@@ -62,9 +82,66 @@ export const rejectOrganizer = async (req:Request,res:Response) => {
             organizer_status : "rejected"
         });
 
+        await sendRejectionEmail(user.email,user.name);
+
+        await logAudit({
+            user_id:  adminData.user_id,
+            action: "Reject_Organizer",
+            entity_type: "User",
+            entity_id: user.user_id,
+            description: `Admin ${adminData.email} rejected organizer ${user.email}`,
+            ip_address: req.ip || null
+        });
+
         return successResponse(res,"Organizer rejected successfully",200);
     } catch (error) {
         return errorResponse(res,"Internal Server Error",500);
     }
 }
 
+export const getAdminDashboard = async (req:Request,res:Response) => {
+    try {
+        const user=(req as any).user;
+
+        if (!user) {
+            return errorResponse(res,"Unautorized user",401);
+        }
+
+        if (user.role!=="admin") {
+            return errorResponse(res,"Only admin allowed!",400);
+        }
+
+        const total_users=await UserModel.count({
+            where: { role: "user" }
+        });
+
+        const totalOrganizer = await UserModel.count({
+            where: { role: "organizer" }
+        });
+
+        const totalEvents = await EventModel.count();
+
+        const totalBookings = await BookingModel.count({
+            where: { booking_status: "confirmed" }
+        });
+
+        const revenueData = await BookingModel.findOne({
+            attributes: [
+                [sequelize_db.fn("SUM",sequelize_db.col("total_amount")), "total_revenue"]
+            ],
+            where: { booking_status : "confirmed" },
+            raw: true    
+        }) as any;
+
+        return successResponse(res,"Admin records fetched successfully!",{
+            total_Users: total_users,
+            total_Organizer: totalOrganizer,
+            total_Events: totalEvents,
+            total_Bookings: totalBookings,
+            total_revenue: Number(revenueData?.total_revenue || 0)
+        });
+
+    } catch (error) {
+        errorResponse(res,"Internal Server Error",500);
+    }
+}
