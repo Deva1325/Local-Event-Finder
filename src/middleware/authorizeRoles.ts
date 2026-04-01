@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 
-export const authorizeRoles = (...roles:string[])=>{
+export const authorizeRoles = (...roles: string[]) => {
 
-    return (req: Request, res : Response, next : NextFunction)=>{
-        
+    return (req: Request, res: Response, next: NextFunction) => {
+
         const user = (req as any).user;
-     
+
         if (!user) {
             return res.status(401).json({
-                message : "Authorization header missing"
+                message: "Authorization header missing"
             });
         }
 
@@ -16,15 +16,15 @@ export const authorizeRoles = (...roles:string[])=>{
             return res.status(403).json({ message: "Access denied, You don't have permission to access this" + roles.join(", ") });
         }
 
-        if (roles.includes("organizer") && user.organizer_status!=="approved") {
+        if (roles.includes("organizer") && user.organizer_status !== "approved") {
             return res.status(403).json({
-                message : "Organizer request is not approved by admin"
+                message: "Organizer request is not approved by admin"
             });
         }
 
         console.log("User from token:", user);
         next();
 
-        
+
     }
 };

@@ -49,9 +49,9 @@ export const getCategory = async (req: Request, res: Response) => {
 }
 
 export const getCategoryById = async (req: Request, res: Response) => {
-    try {       
+    try {
         const id = Number(req.params.id);
-        
+
         const category = await CategoryModel.findByPk(id);
 
         if (!category) {
@@ -68,7 +68,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
     try {
-        const  id  = Number(req.params.id);
+        const id = Number(req.params.id);
         const { name, description, status } = req.body;
 
         const category = await CategoryModel.findByPk(id);
@@ -93,7 +93,7 @@ export const updateCategory = async (req: Request, res: Response) => {
 
 export const deleteCategory = async (req: Request, res: Response) => {
     try {
-        const  id  = Number(req.params.id);
+        const id = Number(req.params.id);
 
         if (!id) {
             return errorResponse(res, "ID is required", 400);
@@ -106,7 +106,7 @@ export const deleteCategory = async (req: Request, res: Response) => {
         }
 
         await category.update({
-            status : "inactive"
+            status: "inactive"
         });
 
         await category.destroy();

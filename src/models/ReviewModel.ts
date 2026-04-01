@@ -15,10 +15,10 @@ interface ReviewAttributes {
 interface ReviewCreationAttributes extends Optional<
     ReviewAttributes,
     "review_id" | "review_text" | "deleted_at"
->{}
+> { }
 
-class ReviewModel extends Model<ReviewAttributes,ReviewCreationAttributes>
-implements ReviewAttributes{
+class ReviewModel extends Model<ReviewAttributes, ReviewCreationAttributes>
+    implements ReviewAttributes {
     public review_id!: number;
     public user_id!: number;
     public event_id!: number;
@@ -28,16 +28,16 @@ implements ReviewAttributes{
 }
 
 ReviewModel.init({
-    review_id:{
-        type : DataTypes.INTEGER,
+    review_id: {
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    user_id:{
-        type : DataTypes.INTEGER,
+    user_id: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
-    event_id:{
+    event_id: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
@@ -49,7 +49,7 @@ ReviewModel.init({
             max: 5
         }
     },
-    review_text:{
+    review_text: {
         type: DataTypes.TEXT,
         allowNull: true
     },
@@ -58,14 +58,14 @@ ReviewModel.init({
         allowNull: true
     }
 },
-{
-    sequelize: sequelize_db,
-    tableName: "reviews",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    paranoid: true
-});
+    {
+        sequelize: sequelize_db,
+        tableName: "reviews",
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+        deletedAt: "deleted_at",
+        paranoid: true
+    });
 
 export default ReviewModel;

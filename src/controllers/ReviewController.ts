@@ -1,54 +1,55 @@
-import {Request,Response} from "express";
-import { successResponse,errorResponse } from "../utils/response";
-import ReviewModel  from "../models/ReviewModel";
-import EventModel  from "../models/EventModel";
-import { isEmpty,isNumber } from "../utils/validator";
+import { Request, Response } from "express";
+import { successResponse, errorResponse } from "../utils/response";
+import ReviewModel from "../models/ReviewModel";
+import EventModel from "../models/EventModel";
+import { isEmpty, isNumber } from "../utils/validator";
 import BookingModel from "../models/BookingModel";
 import { logAudit } from "../utils/auditLogger";
 
-export const createReview = async (req:Request,res:Response) => {
+export const createReview = async (req: Request, res: Response) => {
     try {
-        
+
         const user = (req as any).user;
-        const user_id=user.user_id; 
+        const user_id = user.user_id;
 
         if (!user) {
-            return errorResponse(res,"User not authorized",401);
+            return errorResponse(res, "User not authorized", 401);
         }
-        const {event_id,rating,review_text}=req.body;
+        const { event_id, rating, review_text } = req.body;
 
-        if (isEmpty(event_id) || isEmpty(rating) ) {
-            return errorResponse(res,"Event and rating are required!",400);
+        if (isEmpty(event_id) || isEmpty(rating)) {
+            return errorResponse(res, "Event and rating are required!", 400);
         }
 
-        if (rating<1 || rating>5) {
-            return errorResponse(res,"Rating must be between 1  to 5",400);
+        if (rating < 1 || rating > 5) {
+            return errorResponse(res, "Rating must be between 1  to 5", 400);
         }
-        
-        const event= await EventModel.findByPk(event_id);
-        
+
+        const event = await EventModel.findByPk(event_id);
+
         if (!event) {
-            return errorResponse(res,"Event Not Found",400);
+            return errorResponse(res, "Event Not Found", 400);
         }
 
-        if (event.status!=="ongoing" && event.status!=="completed") {
-            return errorResponse(res,"You can review the event only after event start",400);
+        if (event.status !== "ongoing" && event.status !== "completed") {
+            return errorResponse(res, "You can review the event only after event start", 400);
         }
 
-        const userBooking = await BookingModel.findOne({ 
-            where : { user_id, event_id , booking_status:"confirmed" } });
+        const userBooking = await BookingModel.findOne({
+            where: { user_id, event_id, booking_status: "confirmed" }
+        });
 
         if (!userBooking) {
-            return errorResponse(res,"You cannot give reivew without attend the event",400);
+            return errorResponse(res, "You cannot give reivew without attend the event", 400);
         }
 
-        const existingReview = await ReviewModel.findOne({ where : { user_id,event_id } });
+        const existingReview = await ReviewModel.findOne({ where: { user_id, event_id } });
 
         if (existingReview) {
-            return errorResponse(res,"You already reviewed the event",400);
+            return errorResponse(res, "You already reviewed the event", 400);
         }
 
-        const review=await ReviewModel.create({
+        const review = await ReviewModel.create({
             user_id,
             event_id,
             rating,
@@ -56,122 +57,122 @@ export const createReview = async (req:Request,res:Response) => {
         });
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Review_Created",
-            entity_type: "Review",
-            entity_id: review.review_id,
+            entityType: "Review",
+            entityId: review.review_id,
             description: `User added a ${rating}-star review for Event ID: ${event_id}`,
-            ip_address: req.ip || null
-});
+            ipAddress: req.ip || null
+        });
 
-        return successResponse(res,"Review added succesfully!",review,201);
+        return successResponse(res, "Review added succesfully!", review, 201);
 
     } catch (error) {
         //console.log("Review debug error",error);
-        
-        return errorResponse(res,"Internal server error",500);
-    }
-}   
 
-export const getReviewsByEvent=async (req:Request,res:Response) => {
-    try {
-        const event_id=Number(req.params.event_id);
-
-        if (!isNumber(event_id)) {
-            return errorResponse(res,"Invalid event id",400);
-        }
-
-        const event=await EventModel.findByPk(event_id);
-
-        if (!event) {
-            return errorResponse(res,"Event Not Found",400);
-        }
-
-        const reviews = await ReviewModel.findAll({ 
-            where : { event_id },   
-            order: [["created_at","DESC"]]
-        });
-
-        return successResponse(res,"Reviews fetched successfully",reviews,200);
-    } catch (error) {   
-        console.log("get event error",error);
-        
-        return errorResponse(res,"Internal server error",500);       
+        return errorResponse(res, "Internal server error", 500);
     }
 }
 
-export const updateReview = async (req:Request,res:Response) => {
+export const getReviewsByEvent = async (req: Request, res: Response) => {
     try {
-        const user=(req as any).user;
-        const user_id=user.user_id;
+        const event_id = Number(req.params.event_id);
 
-        const review_id=Number(req.params.review_id);
-
-        if (!isNumber(review_id)) {
-            return errorResponse(res,"Invalid review id",400);
+        if (!isNumber(event_id)) {
+            return errorResponse(res, "Invalid event id", 400);
         }
 
-        const { rating,review_text }=req.body;
+        const event = await EventModel.findByPk(event_id);
 
-        const review=await ReviewModel.findOne({ where : { review_id,user_id} });
+        if (!event) {
+            return errorResponse(res, "Event Not Found", 400);
+        }
+
+        const reviews = await ReviewModel.findAll({
+            where: { event_id },
+            order: [["created_at", "DESC"]]
+        });
+
+        return successResponse(res, "Reviews fetched successfully", reviews, 200);
+    } catch (error) {
+        console.log("get event error", error);
+
+        return errorResponse(res, "Internal server error", 500);
+    }
+}
+
+export const updateReview = async (req: Request, res: Response) => {
+    try {
+        const user = (req as any).user;
+        const user_id = user.user_id;
+
+        const review_id = Number(req.params.review_id);
+
+        if (!isNumber(review_id)) {
+            return errorResponse(res, "Invalid review id", 400);
+        }
+
+        const { rating, review_text } = req.body;
+
+        const review = await ReviewModel.findOne({ where: { review_id, user_id } });
 
         if (!review) {
-            return errorResponse(res,"Review Not Found",400);
+            return errorResponse(res, "Review Not Found", 400);
         }
 
         await review.update({
-           rating,
-           review_text 
+            rating,
+            review_text
         });
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Review_Updated",
-            entity_type: "Review",
-            entity_id: review.review_id,
+            entityType: "Review",
+            entityId: review.review_id,
             description: `User updated a ${rating}-star review for Event ID: ${review.event_id}`,
-            ip_address: req.ip || null
+            ipAddress: req.ip || null
         });
 
-        return successResponse(res,"Review updated successfully!",review,200);
+        return successResponse(res, "Review updated successfully!", review, 200);
     } catch (error) {
-        console.log("Update review error",error);
-        return errorResponse(res,"Internal server error",500);
+        console.log("Update review error", error);
+        return errorResponse(res, "Internal server error", 500);
     }
 }
 
-export const deleteReview = async (req:Request,res:Response) => {
+export const deleteReview = async (req: Request, res: Response) => {
     try {
         const user = (req as any).user;
-        const user_id=user.user_id;
+        const user_id = user.user_id;
 
-        const review_id=Number(req.params.review_id);
+        const review_id = Number(req.params.review_id);
 
         if (!isNumber(review_id)) {
-            return errorResponse(res,"Invalid review id",400);
+            return errorResponse(res, "Invalid review id", 400);
         }
 
-        const review=await ReviewModel.findOne({ where : { review_id, user_id} });
+        const review = await ReviewModel.findOne({ where: { review_id, user_id } });
 
         if (!review) {
-            return errorResponse(res,"Review not found",400);
+            return errorResponse(res, "Review not found", 400);
         }
 
         await review.destroy();
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Review_Deleted",
-            entity_type: "Review",
-            entity_id: review.review_id,
+            entityType: "Review",
+            entityId: review.review_id,
             description: `User deleted a review for Event ID: ${review.event_id}`,
-            ip_address: req.ip || null
+            ipAddress: req.ip || null
         });
 
-        return successResponse(res,"Review deleted successfully",200);
+        return successResponse(res, "Review deleted successfully", 200);
 
     } catch (error) {
         console.log(error);
-        return errorResponse(res,"Internal server error",500);
+        return errorResponse(res, "Internal server error", 500);
     }
 }   

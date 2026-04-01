@@ -1,26 +1,25 @@
-import { Model,DataTypes,Optional } from "sequelize";
+import { Model, DataTypes, Optional } from "sequelize";
 import { sequelize_db } from "../config/db";
 
-interface AuditLogAttributes{
+interface AuditLogAttributes {
     audit_id: number;
-    user_id: number;              
+    user_id: number;
     action: string;
     entity_type: string;
     entity_id: number | null;
     description: string | null;
     ip_address: string | null;
-   // created_at: Date;
+    // created_at: Date;
 }
 
 interface AuditLogCreationAttributes extends Optional<
     AuditLogAttributes,
-    "audit_id" | "entity_id" | "description" | "ip_address" 
->{}
+    "audit_id" | "entity_id" | "description" | "ip_address"
+> { }
 
 class AuditLogModel
-extends Model<AuditLogAttributes,AuditLogCreationAttributes>
-implements AuditLogAttributes
-{
+    extends Model<AuditLogAttributes, AuditLogCreationAttributes>
+    implements AuditLogAttributes {
     public audit_id!: number;
     public user_id!: number;
     public action!: string;
@@ -29,7 +28,7 @@ implements AuditLogAttributes
     public description!: string | null;
     public ip_address!: string | null;
     public created_at!: Date;
-}    
+}
 
 AuditLogModel.init(
     {
@@ -50,7 +49,7 @@ AuditLogModel.init(
             type: DataTypes.STRING(50),
             allowNull: false
         },
-        entity_id:{
+        entity_id: {
             type: DataTypes.INTEGER,
             allowNull: true
         },

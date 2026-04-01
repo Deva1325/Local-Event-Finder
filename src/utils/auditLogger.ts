@@ -1,23 +1,23 @@
 import { AuditLogModel } from "../models";
 
 interface AuditLogParams{
-    user_id: number,
+    userId: number,
     action: string;
-    entity_type: string;
-    entity_id: number | null;
+    entityType: string;
+    entityId: number | null;
     description: string | null;
-    ip_address: string | null;
+    ipAddress: string | null;
 }
 
-export const logAudit = async ({user_id,action,entity_type,entity_id=null,description=null,ip_address=null}:AuditLogParams) => {
+export const logAudit = async ({userId,action,entityType,entityId=null,description=null,ipAddress=null}:AuditLogParams) => {
     try {
         await AuditLogModel.create({
-            user_id,
+            user_id: userId,
             action,
-            entity_type,
-            entity_id,
+            entity_type: entityType,
+            entity_id: entityId,
             description,
-            ip_address
+            ip_address: ipAddress
         });   
     } catch (error) {
         console.error("Audit log error",error);

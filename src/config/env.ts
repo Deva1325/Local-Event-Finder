@@ -18,7 +18,7 @@ export const ENV = {
 
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1h",
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
-  
+
   SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
   SENDGRID_FROM_EMAIL: process.env.SENDGRID_FROM_EMAIL,
 
@@ -30,6 +30,10 @@ export const ENV = {
 
 
 
+
+// http://localhost:3000/api-docs
+
+// http://192.168.1.103:3000/api-docs
 
 /*
 {

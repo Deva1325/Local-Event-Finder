@@ -1,12 +1,12 @@
 import express from "express";
 import { bearerToken } from "../middleware/bearerToken";
-import {createBooking,cancelBooking,getMyBookings} from "../controllers/BookingController";
+import { createBooking, cancelBooking, getMyBookings } from "../controllers/BookingController";
 
-const router=express.Router();
+const router = express.Router();
 
-router.post('/',bearerToken,createBooking);
-router.put('/cancel/:id',bearerToken,cancelBooking);
-router.get('/mybookings',bearerToken,getMyBookings);
+router.post('/', bearerToken, createBooking);
+router.put('/cancel/:id', bearerToken, cancelBooking);
+router.get('/mybookings', bearerToken, getMyBookings);
 
 //console.log("Hello from booking routes");
 

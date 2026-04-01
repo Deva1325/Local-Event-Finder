@@ -3,13 +3,13 @@ import { ENV } from "../config/env";
 
 sgMail.setApiKey(ENV.SENDGRID_API_KEY as string);
 
-export const sendVerificationEmail = async (email:string ,   verificationLink: string) => {
-      
-        const message = {
-            to : email,
-            from: ENV.SENDGRID_FROM_EMAIL as string,
-             subject: "Verify your Event Finder Account",
-            html: `
+export const sendVerificationEmail = async (email: string, verificationLink: string) => {
+
+    const message = {
+        to: email,
+        from: ENV.SENDGRID_FROM_EMAIL as string,
+        subject: "Verify your Event Finder Account",
+        html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
             <h2 style="color: #4CAF50; text-align: center;">Welcome to Local Event Finder!</h2>
             <p>Thank you for registering. To complete your setup, please verify your email address by clicking the button below:</p>
@@ -23,19 +23,19 @@ export const sendVerificationEmail = async (email:string ,   verificationLink: s
             </p>
         </div>
             `,
-            trackingSettings: {
+        trackingSettings: {
             clickTracking: {
                 enable: false,
                 enableText: false
             }
         }
-        };
-        
-        await sgMail.send(message);
+    };
+
+    await sgMail.send(message);
 }
 
-export const sendForgotPasswordEmail= async (email:string,resetLink:string) => {
-    const message = { 
+export const sendForgotPasswordEmail = async (email: string, resetLink: string) => {
+    const message = {
         to: email,
         from: ENV.SENDGRID_FROM_EMAIL as string,
         subject: "Reset Your Password",
@@ -70,9 +70,9 @@ export const sendForgotPasswordEmail= async (email:string,resetLink:string) => {
     await sgMail.send(message);
 }
 
-export const sendApprovalEmail =async (email:string,name:string) => {
-    const message={
-        to:email,
+export const sendApprovalEmail = async (email: string, name: string) => {
+    const message = {
+        to: email,
         from: ENV.SENDGRID_FROM_EMAIL as string,
         subject: "Congratulations! Your Organizer Account is Approved",
         html: `
@@ -94,9 +94,9 @@ export const sendApprovalEmail =async (email:string,name:string) => {
     await sgMail.send(message);
 }
 
-export const sendRejectionEmail=async (email:string,name:string) => {
-    const message={
-        to:email,
+export const sendRejectionEmail = async (email: string, name: string) => {
+    const message = {
+        to: email,
         from: ENV.SENDGRID_FROM_EMAIL as string,
         subject: "Update regarding your Organizer Application",
         html: `

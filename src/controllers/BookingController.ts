@@ -3,8 +3,9 @@ import BookingModel from "../models/BookingModel";
 import EventModel from "../models/EventModel";
 import { successResponse,errorResponse } from "../utils/response";
 import { sequelize_db } from "../config/db";
-import { isEmpty } from "../utils/validator";
+import { isEmpty, isNumber } from "../utils/validator";
 import { logAudit } from "../utils/auditLogger";
+import { BOOKING_STATUS,EVENT_STATUS } from "../constants/status";
 
 export const createBooking = async (req:Request,res : Response) => {
     
@@ -20,6 +21,10 @@ export const createBooking = async (req:Request,res : Response) => {
 
         if ((isEmpty(event_id) || isEmpty(ticket_quantity))) {
             return errorResponse(res,"Event id and ticket quantity is required",400);
+        }
+
+        if (isNumber(ticket_quantity)|| ticket_quantity<0) {
+            return errorResponse(res,"Ticket quantity must be a positive number",400);
         }
 
         transaction = await sequelize_db.transaction();
@@ -44,9 +49,9 @@ export const createBooking = async (req:Request,res : Response) => {
             return errorResponse(res,"Booking is closed for the event",400);
         }
 
-        if (event.status!=='published' && event.status!=='ongoing') {
+        if (event.status!==EVENT_STATUS.PUBLISHED && event.status!==EVENT_STATUS.ONGOING) {
             await transaction.rollback();   
-            return errorResponse(res,"Booking allow only for published events",400);
+            return errorResponse(res,"Booking allow only for published or ongoing events",400);
         }
 
         if (event.available_seats<ticket_quantity) {
@@ -67,6 +72,11 @@ export const createBooking = async (req:Request,res : Response) => {
 
         const newAvailSeats=event.available_seats-ticket_quantity;
 
+        if (newAvailSeats<0) {
+            await transaction.rollback();
+            return errorResponse(res,"No enough seats available",400);
+        }
+
         await event.update({
             available_seats:newAvailSeats
         }, { transaction });
@@ -74,12 +84,12 @@ export const createBooking = async (req:Request,res : Response) => {
         await transaction.commit();
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Booking_Created",
-            entity_type: "Booking",
-            entity_id: booking.booking_id,
+            entityType: "Booking",
+            entityId: booking.booking_id,
             description: `User booked ${ticket_quantity} tickets for Event ID: ${event_id}`,
-            ip_address: req.ip || null
+            ipAddress : req.ip || null
         });
 
         return successResponse(res,"Event booked successfully",booking,201);
@@ -87,6 +97,7 @@ export const createBooking = async (req:Request,res : Response) => {
     } catch (error) {
         if(transaction)
             await transaction.rollback();
+        console.error("Create Booking Error: ",error);
         return errorResponse(res,"Internal Server Error",500);
     }
 }
@@ -96,8 +107,12 @@ export const cancelBooking = async (req:Request,res: Response) => {
     let transaction;
     try {
         const user=(req as any).user;
-        console.log("user: ",user);
+        //console.log("user: ",user);
         
+        if (!user) {
+            return errorResponse(res,"User not authorized",403);
+        }
+
         const booking_id=Number(req.params.id);
 
         transaction=await sequelize_db.transaction();
@@ -116,29 +131,34 @@ export const cancelBooking = async (req:Request,res: Response) => {
             return errorResponse(res,"Not valid user",403);
         }
 
-        if (booking.booking_status==="cancelled") {
+        if (booking.booking_status===BOOKING_STATUS.CANCELLED) {
             await transaction.rollback();
             return errorResponse(res,"Booking is already cancelled",400);
         }
         await booking.update({
-            booking_status : "cancelled",
+            booking_status : BOOKING_STATUS.CANCELLED,
         }, { transaction });
 
         const event=await EventModel.findByPk(booking.event_id,{transaction});
 
-        await event?.update({
+        if (!event) {
+            await transaction.rollback();
+            return errorResponse(res,"Event not found",404);
+        }
+
+        await event.update({
             available_seats: event.available_seats + booking.ticket_quantity
         }, { transaction });
 
         await transaction.commit();
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Booking_Cancelled",
-            entity_type: "Booking",
-            entity_id: booking.booking_id,
+            entityType: "Booking",
+            entityId: booking.booking_id,
             description: `User cancelled booking for Event ID: ${booking.event_id}`,
-            ip_address: req.ip || null
+            ipAddress : req.ip || null
         });
 
         return successResponse(res,"Event cancelled successfully!",booking,200);
@@ -154,13 +174,12 @@ export const getMyBookings = async (req:Request,res:Response) => {
         const user=(req as any).user;
         //console.log(user);
         
-        const mybookings=await BookingModel.findAll({ where : { user_id : user.user_id }});
+        const mybookings=await BookingModel.findAll({ 
+            where : { user_id : user.user_id },
+            order : [['createdAt','DESC']]
+        });
         //console.log("mybookings: ",mybookings);
-        
-        if (mybookings.length===0) {
-            return errorResponse(res,"No bookings found for this user",404);
-        }
-
+    
         return successResponse(res,"Booking fetched successfully",mybookings,200);
     } catch (error) {
         return errorResponse(res,"Internal Server Error",500);

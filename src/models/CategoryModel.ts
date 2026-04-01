@@ -1,4 +1,4 @@
-import { Model,DataType,Optional, DataTypes } from "sequelize";
+import { Model, DataType, Optional, DataTypes } from "sequelize";
 import { sequelize_db } from "../config/db";
 
 interface CategoryAttributes {
@@ -10,32 +10,31 @@ interface CategoryAttributes {
 }
 
 interface CategoryCreationAttributes extends Optional<
-CategoryAttributes,
-    "category_id" | "description" | "status" | "deleted_at"
->{}
+  CategoryAttributes,
+  "category_id" | "description" | "status" | "deleted_at"
+> { }
 
 class CategoryModel
-    extends Model<CategoryAttributes,CategoryCreationAttributes>
-    implements CategoryAttributes
-    {
-        public category_id!: number;
-        public name!: string;
-        public description!: string | null;
-        public status!: "active" | "inactive";
+  extends Model<CategoryAttributes, CategoryCreationAttributes>
+  implements CategoryAttributes {
+  public category_id!: number;
+  public name!: string;
+  public description!: string | null;
+  public status!: "active" | "inactive";
 
-        public created_at!: Date;
-        public updated_at!: Date;
-        public deleted_at!: Date | null;
-    }
+  public created_at!: Date;
+  public updated_at!: Date;
+  public deleted_at!: Date | null;
+}
 
 CategoryModel.init(
-    {
-        category_id:{
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement:true
-        },
-         name: {
+  {
+    category_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    name: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true

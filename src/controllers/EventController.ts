@@ -65,12 +65,12 @@ export const createEvent = async (req:Request,res : Response) => {
         });
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Event_Created",
-            entity_type: "Event",
-            entity_id: event.event_id,
+            entityType: "Event",
+            entityId: event.event_id,
             description: `Organizer created a new event: ${event.title}`,
-            ip_address: req.ip || null
+            ipAddress : req.ip || null
          });
 
         return successResponse(res, "Event created successfully", event, 201);
@@ -197,12 +197,12 @@ export const updateEvent = async (req:Request,res : Response) => {
     });    
 
     await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Event_Updated",
-            entity_type: "Event",
-            entity_id: event.event_id,
+            entityType: "Event",
+            entityId: event.event_id,
             description: `Organizer updated event details for: ${event.title}`,
-            ip_address: req.ip || null
+            ipAddress : req.ip || null
          });
 
         return successResponse(res, "Event updated successfully", event);
@@ -230,12 +230,12 @@ export const deleteEvent = async (req:Request,res:Response) => {
         await event.destroy();
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Event_Deleted",
-            entity_type: "Event",
-            entity_id: event.event_id,
+            entityType: "Event",
+            entityId: event.event_id,
             description: `Organizer deleted event: ${event.title}`,
-            ip_address: req.ip || null
+            ipAddress : req.ip || null
          });
 
         return successResponse(res,"Event deleted successfully",event,200);
@@ -273,12 +273,12 @@ export const cancelEvent = async (req:Request,res:Response) => {
         });
 
         await logAudit({
-            user_id: user.user_id,
+            userId: user.user_id,
             action: "Event_Cancelled",
-            entity_type: "Event",
-            entity_id: event.event_id,
+            entityType: "Event",
+            entityId: event.event_id,
             description: `Organizer cancelled event: ${event.title}`,
-            ip_address: req.ip || null
+            ipAddress : req.ip || null
          });
 
         return successResponse(res,"Event cancelled successfully",200);

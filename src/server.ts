@@ -1,10 +1,10 @@
-import  express  from "express";
+import express from "express";
 import { ENV } from "./config/env";
 import { connectDB } from "./config/db";
 import authRoutes from "./routes/authRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
-import  adminRoutes from "./routes/adminRoutes";
-import  eventRoutes from "./routes/eventRoutes";
+import adminRoutes from "./routes/adminRoutes";
+import eventRoutes from "./routes/eventRoutes";
 import bookingRoutes from "./routes/bookingRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
 import organizerRoutes from "./routes/OrganizerRoutes";
@@ -20,7 +20,7 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true }));
 // Handles standard forms
 
 // app.get('/',(req,res)=>{
@@ -28,21 +28,21 @@ app.use(express.urlencoded({ extended: true }));
 // });
 
 connectDB();
-eventCron(); 
+eventCron();
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use("/api/auth",authRoutes);
-app.use("/api/categories",categoryRoutes);
-app.use("/api/admin",adminRoutes);
-app.use("/api/events",eventRoutes);
-app.use("/api/bookings",bookingRoutes);
-app.use("/api/reviews",reviewRoutes);
-app.use("/api/organizer",organizerRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/organizer", organizerRoutes);
 
 
 const PORT = Number(ENV.PORT) || 3000;
 
-app.listen(PORT,'0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
     //console.log(`Network: http://192.168.1.103:${PORT}`);
 });     
