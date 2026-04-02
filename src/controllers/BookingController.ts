@@ -23,7 +23,7 @@ export const createBooking = async (req:Request,res : Response) => {
             return errorResponse(res,"Event id and ticket quantity is required",400);
         }
 
-        if (isNumber(ticket_quantity)|| ticket_quantity<0) {
+        if (!isNumber(ticket_quantity)|| ticket_quantity<0) {
             return errorResponse(res,"Ticket quantity must be a positive number",400);
         }
 
@@ -56,7 +56,7 @@ export const createBooking = async (req:Request,res : Response) => {
 
         if (event.available_seats<ticket_quantity) {
             await transaction.rollback();
-            return errorResponse(res,"No enough seats available",400);
+            return errorResponse(res,"Not enough seats available",400);
         }
 
         const total_amt=event.ticket_price*ticket_quantity;
@@ -181,7 +181,7 @@ export const getMyBookings = async (req:Request,res:Response) => {
         //console.log("mybookings: ",mybookings);
     
         return successResponse(res,"Booking fetched successfully",mybookings,200);
-    } catch (error) {
+    } catch (error) {   
         return errorResponse(res,"Internal Server Error",500);
     }
 }

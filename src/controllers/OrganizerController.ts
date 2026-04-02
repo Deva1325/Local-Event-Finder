@@ -10,12 +10,8 @@ export const getOrganizerDashboard = async (req:Request,res:Response) => {
     try {
         const user=(req as any).user;
 
-        if (!user) {
-            return errorResponse(res,"Unauthorized User",401);
-        }
-
-        if (user.role!=='organizer') {
-            return errorResponse(res,"only organizer allowed!",400);
+        if (!user || user.role!=='organizer') {
+            return errorResponse(res,"Unauthorized Access",401);
         }
 
         const organizer_id = user.user_id;
@@ -37,7 +33,7 @@ export const getOrganizerDashboard = async (req:Request,res:Response) => {
         }) as any;
 
         const totalRevenue = await BookingModel.findOne({
-            attributes: [
+            attributes: [   
                 [sequelize_db.fn("SUM",sequelize_db.col("total_amount")),"total_revenue"]
             ],
             include: [{

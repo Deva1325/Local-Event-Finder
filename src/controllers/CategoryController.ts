@@ -1,18 +1,20 @@
 import { Request, Response } from "express";
 import CategoryModel from "../models/CategoryModel";
-import { isEmpty } from "../utils/validator";
+import { isEmpty, isNumber } from "../utils/validator";
 import { successResponse, errorResponse } from "../utils/response";
 
 export const createCategory = async (req: Request, res: Response) => {
     try {
         const { name, description } = req.body;
 
-        if (isEmpty(name)) {
+        const categoryName = name? name.trim() : name;
+
+        if (isEmpty(categoryName)) {
             return errorResponse(res, "Category Name is required", 400);
         }
 
         const existingCategory = await CategoryModel.findOne({
-            where: { name }
+            where: { name: categoryName }
         });
 
         if (existingCategory) {
@@ -20,7 +22,9 @@ export const createCategory = async (req: Request, res: Response) => {
         }
 
         const category = await CategoryModel.create({
-            name, description, status: "active"
+            name: categoryName,
+            description, 
+            status: "active"
         });
 
         return successResponse(res, "Category created successfully!", category, 201);
@@ -36,11 +40,11 @@ export const createCategory = async (req: Request, res: Response) => {
 export const getCategory = async (req: Request, res: Response) => {
     try {
         const categories = await CategoryModel.findAll({
-            where: { status: "active", deleted_at: null },
+            where: { status: "active"},
             order: [["created_at", "DESC"]]
         });
 
-        return successResponse(res, "Catgories fetched Successfully!", categories, 200);
+        return successResponse(res, "Categories fetched Successfully!", categories, 200);
 
     } catch (error) {
         console.error("Error while get all categories:", error);
@@ -52,13 +56,17 @@ export const getCategoryById = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
 
+        if (!isNumber(id) && id<=0) {
+            return errorResponse(res,"Invalid category id",400);
+        }
+
         const category = await CategoryModel.findByPk(id);
 
         if (!category) {
             return errorResponse(res, "Category not found", 404);
         }
 
-        return successResponse(res, "Catgory fetched Successfully!", category, 200);
+        return successResponse(res, "Category fetched Successfully!", category, 200);
 
     } catch (error) {
         console.error("Error while get specific category:", error);
@@ -71,14 +79,30 @@ export const updateCategory = async (req: Request, res: Response) => {
         const id = Number(req.params.id);
         const { name, description, status } = req.body;
 
+        if (name!==undefined && isEmpty(name.trim())) {
+            return errorResponse(res,"Category name cannot be empty",400);
+        }
+
         const category = await CategoryModel.findByPk(id);
 
         if (!category) {
             return errorResponse(res, "Category not found", 404);
         }
 
+        if (name) {
+            const categoryName = name.trim();
+
+            const existingCategory=await CategoryModel.findOne({
+               where: {name: categoryName} 
+            });
+
+            if (existingCategory && existingCategory.category_id!=id) {
+                return errorResponse(res,"Category already exists with this name",400);
+            }
+        }
+
         await category.update({
-            name: name ?? category.name,
+            name: name ? name.trim() : category.name,
             description: description ?? category.description,
             status: status ?? category.status
         });
@@ -105,13 +129,13 @@ export const deleteCategory = async (req: Request, res: Response) => {
             return errorResponse(res, "Category not found", 404);
         }
 
-        await category.update({
-            status: "inactive"
-        });
+        // await category.update({
+        //    status: "inactive"
+        // }); 
 
         await category.destroy();
 
-        return successResponse(res, "Category deleted successfully", 200);
+        return successResponse(res, "Category deleted successfully");
 
     } catch (error) {
         console.error("Update Category Error:", error);
