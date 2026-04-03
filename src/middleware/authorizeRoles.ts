@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { errorResponse } from "../utils/response";
 
 export const authorizeRoles = (...roles: string[]) => {
 
@@ -7,22 +8,18 @@ export const authorizeRoles = (...roles: string[]) => {
         const user = (req as any).user;
 
         if (!user) {
-            return res.status(401).json({
-                message: "Authorization header missing"
-            });
+            return errorResponse(res, "User not authorized", 401);
         }
 
         if (!roles.includes(user.role)) {
-            return res.status(403).json({ message: "Access denied, You don't have permission to access this" + roles.join(", ") });
+            return errorResponse(res, `Access denied, only ${roles.join(",")} can access this resource`, 403);
         }
 
         if (roles.includes("organizer") && user.organizer_status !== "approved") {
-            return res.status(403).json({
-                message: "Organizer request is not approved by admin"
-            });
+            return errorResponse(res, "Organizer request is not approved by admin", 403);
         }
 
-        console.log("User from token:", user);
+        //console.log("User from token:", user);
         next();
 
 

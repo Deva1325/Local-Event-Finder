@@ -4,35 +4,43 @@ import ReviewModel from "../models/ReviewModel";
 import EventModel from "../models/EventModel";
 import { isEmpty, isNumber } from "../utils/validator";
 import BookingModel from "../models/BookingModel";
+import UserModel from "../models/UserModel";
 import { logAudit } from "../utils/auditLogger";
 
 export const createReview = async (req: Request, res: Response) => {
     try {
 
         const user = (req as any).user;
-        const user_id = user.user_id;
 
         if (!user) {
             return errorResponse(res, "User not authorized", 401);
         }
+
+        const user_id = user.user_id;
         const { event_id, rating, review_text } = req.body;
 
         if (isEmpty(event_id) || isEmpty(rating)) {
             return errorResponse(res, "Event and rating are required!", 400);
         }
 
-        if (rating < 1 || rating > 5) {
+        if (!isNumber(rating)) {
+            return errorResponse(res, "Rating must be a number", 400);
+        }
+
+        const ratingValue = Number(rating);
+
+        if (ratingValue < 1 || ratingValue > 5) {
             return errorResponse(res, "Rating must be between 1  to 5", 400);
         }
 
         const event = await EventModel.findByPk(event_id);
 
         if (!event) {
-            return errorResponse(res, "Event Not Found", 400);
+            return errorResponse(res, "Event Not Found", 404);
         }
 
         if (event.status !== "ongoing" && event.status !== "completed") {
-            return errorResponse(res, "You can review the event only after event start", 400);
+            return errorResponse(res, "You can review only ongoing and completed events", 400);
         }
 
         const userBooking = await BookingModel.findOne({
@@ -40,7 +48,7 @@ export const createReview = async (req: Request, res: Response) => {
         });
 
         if (!userBooking) {
-            return errorResponse(res, "You cannot give reivew without attend the event", 400);
+            return errorResponse(res, "You cannot give review without attending the event", 400);
         }
 
         const existingReview = await ReviewModel.findOne({ where: { user_id, event_id } });
@@ -52,7 +60,7 @@ export const createReview = async (req: Request, res: Response) => {
         const review = await ReviewModel.create({
             user_id,
             event_id,
-            rating,
+            rating: ratingValue,
             review_text
         });
 
@@ -65,7 +73,7 @@ export const createReview = async (req: Request, res: Response) => {
             ipAddress: req.ip || null
         });
 
-        return successResponse(res, "Review added succesfully!", review, 201);
+        return successResponse(res, "Review added successfully", review, 201);
 
     } catch (error) {
         //console.log("Review debug error",error);
@@ -85,12 +93,22 @@ export const getReviewsByEvent = async (req: Request, res: Response) => {
         const event = await EventModel.findByPk(event_id);
 
         if (!event) {
-            return errorResponse(res, "Event Not Found", 400);
+            return errorResponse(res, "Event Not Found", 404);
         }
+
+        const page = Number(req.query.page || 1);
+        const limit = Number(req.query.limit || 10);
+        const offset = (page - 1) * limit;
 
         const reviews = await ReviewModel.findAll({
             where: { event_id },
-            order: [["created_at", "DESC"]]
+            include: [{
+                model: UserModel,
+                as: "user",
+                attributes: ["user_id", "name", "email"]
+            }],
+            order: [["created_at", "DESC"]],
+            limit, offset
         });
 
         return successResponse(res, "Reviews fetched successfully", reviews, 200);
@@ -117,11 +135,28 @@ export const updateReview = async (req: Request, res: Response) => {
         const review = await ReviewModel.findOne({ where: { review_id, user_id } });
 
         if (!review) {
-            return errorResponse(res, "Review Not Found", 400);
+            return errorResponse(res, "Review Not Found", 404);
+        }
+
+        if (rating === undefined && isEmpty(review_text)) {
+            return errorResponse(res, "Nothing to update", 400);
+        }
+
+        let ratingValue;
+        if (rating != undefined) {
+            if (!isNumber(rating)) {
+                return errorResponse(res, "Rating must be a number", 400);
+            }
+
+            ratingValue=Number(rating);
+
+            if (rating < 1 || rating > 5) {
+                return errorResponse(res, "Rating must be between 1 to 5", 400);
+            }
         }
 
         await review.update({
-            rating,
+            rating: ratingValue?? review.rating,
             review_text
         });
 
@@ -155,7 +190,7 @@ export const deleteReview = async (req: Request, res: Response) => {
         const review = await ReviewModel.findOne({ where: { review_id, user_id } });
 
         if (!review) {
-            return errorResponse(res, "Review not found", 400);
+            return errorResponse(res, "Review not found", 404);
         }
 
         await review.destroy();
@@ -169,7 +204,7 @@ export const deleteReview = async (req: Request, res: Response) => {
             ipAddress: req.ip || null
         });
 
-        return successResponse(res, "Review deleted successfully", 200);
+        return successResponse(res, "Review deleted successfully");
 
     } catch (error) {
         console.log(error);

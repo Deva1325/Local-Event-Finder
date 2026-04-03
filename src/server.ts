@@ -9,13 +9,17 @@ import bookingRoutes from "./routes/bookingRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
 import organizerRoutes from "./routes/OrganizerRoutes";
 
-import swaggerUi from "swagger-ui-express";
+import swaggerUi, { serve } from "swagger-ui-express";
 import swaggerDocument from "./core/AppSwagger.json";
 import cors from "cors";
 import { eventCron } from "./utils/eventCron";
-import "./models";
 
 const app = express();
+
+// app.use((req, res, next) => {
+//   console.log("Incoming request:", req.method, req.url);
+//   next();
+// });
 
 app.use(cors());
 
@@ -27,8 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 //     res.send("Local Event Finder API running...");
 // });
 
-connectDB();
-eventCron();
+//connectDB();
+//eventCron();
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/auth", authRoutes);
@@ -42,7 +46,27 @@ app.use("/api/organizer", organizerRoutes);
 
 const PORT = Number(ENV.PORT) || 3000;
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
-    //console.log(`Network: http://192.168.1.103:${PORT}`);
-});     
+const startServer = async () => {
+    try {
+        await connectDB();
+        eventCron();
+
+        const server = app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+
+        server.on("error", (err) => {
+            console.error("Server listen error:", err);
+        });
+
+    } catch (error) {
+        console.error("Server start error:", error);
+    }
+};
+
+startServer();
+
+// // app.listen(PORT, '0.0.0.0', () => {
+// //     console.log(`Server is running on port ${PORT}`);
+// //     //console.log(`Network: http://192.168.1.103:${PORT}`);
+// // });     

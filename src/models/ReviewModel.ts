@@ -65,7 +65,13 @@ ReviewModel.init({
         createdAt: "created_at",
         updatedAt: "updated_at",
         deletedAt: "deleted_at",
-        paranoid: true
+        paranoid: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ["user_id", "event_id"]
+            }
+        ]
     });
 
 export default ReviewModel;

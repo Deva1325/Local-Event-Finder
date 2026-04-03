@@ -131,6 +131,9 @@ export const getAllEvent = async (req: Request, res: Response) => {
 
         return successResponse(res, "All Events fetched successfully!", events, 200);
     } catch (error) {
+        console.error("Get all events error: ", error);
+        
+        //log.error("Get all events error: ", error);
         return errorResponse(res, "Internal server error", 500);
     }
 }
