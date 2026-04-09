@@ -43,6 +43,12 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/organizer", organizerRoutes);
 
+app.use((req,res)=>{
+    res.status(404).json({
+        success: false,
+        message: "Route not found"
+    });
+});
 
 const PORT = Number(ENV.PORT) || 3000;
 

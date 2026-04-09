@@ -42,9 +42,9 @@ export const handleOrganizerStatus = async (req:Request,res:Response,
     }
 
     if (status===ORGANIZER_STATUS.APPROVED) {
-        sendApprovalEmail(user.email,user.name).catch(err=> console.error("Email sending error: ",err));
+        sendApprovalEmail(user.email,user.name);
     }else{
-        sendRejectionEmail(user.email,user.name).catch(err=> console.error("Email sending error: ",err));
+        sendRejectionEmail(user.email,user.name);
     }
 
     await logAudit({

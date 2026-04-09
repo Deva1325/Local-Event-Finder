@@ -45,6 +45,21 @@ export const createEvent = async (req: Request, res: Response) => {
             return errorResponse(res, "Booking end date cannot be before booking start date", 400);
         }
 
+        const existingEvent = await EventModel.findOne({
+            where: {
+                title,
+                start_date,
+                organizer_id: user.user_id
+            }
+        });
+
+        if (existingEvent) {
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
+            return errorResponse(res,"Event already exists for this date",400);
+        }
+
         let image_url = null;
 
         if (req.file) {

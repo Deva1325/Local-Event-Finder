@@ -59,7 +59,8 @@ EventModel.init(
     },
     organizer_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      unique: "event_unique"
     },
 
     category_id: {
@@ -69,7 +70,8 @@ EventModel.init(
 
     title: {
       type: DataTypes.STRING(255),
-      allowNull: false
+      allowNull: false,
+      unique: "event_unique"
     },
 
     image_url: {
@@ -99,7 +101,8 @@ EventModel.init(
 
     start_date: {
       type: DataTypes.DATEONLY,
-      allowNull: false
+      allowNull: false,
+      unique: "event_unique"
     },
     end_date: {
       type: DataTypes.DATEONLY,
@@ -150,8 +153,17 @@ EventModel.init(
     paranoid: true,
     createdAt: "created_datetime",
     updatedAt: false,
-    deletedAt: "deleted_at"
-  }
+    deletedAt: "deleted_at",
+
+    indexes: [
+      { fields: ["status"] },
+      { fields: ["booking_start_date"] },
+      { fields: ["start_date"] },
+      { fields: ["end_date"] }
+    ]
+
+  },
+
 );
 
 export default EventModel;

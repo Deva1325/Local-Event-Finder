@@ -1,117 +1,89 @@
 import sgMail from "@sendgrid/mail";
 import { ENV } from "../config/env";
+import { isValidEmail } from "../utils/validator";
+import { verificationTemplate, forgotPasswordTemplate, approvalTemplate, rejectionTemplate } from "../templates/emailTemplates";
 
 sgMail.setApiKey(ENV.SENDGRID_API_KEY as string);
 
-export const sendVerificationEmail = async (email: string, verificationLink: string) => {
+const emailConfig = {
+    from: ENV.SENDGRID_FROM_EMAIL as string,
+    trackingSettings: {
+        clickTracking: {
+            enable: false,
+            enableText: false
+        }
+    }
+}
+
+export const sendVerificationEmail = (email: string, verificationLink: string) => {
 
     const message = {
         to: email,
-        from: ENV.SENDGRID_FROM_EMAIL as string,
+        ...emailConfig,
         subject: "Verify your Event Finder Account",
-        html: `
-            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #4CAF50; text-align: center;">Welcome to Local Event Finder!</h2>
-            <p>Thank you for registering. To complete your setup, please verify your email address by clicking the button below:</p>
-            
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="${verificationLink}" style="background-color: #4CAF50; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">Verify Email Address</a>
-            </div>
-
-            <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-                This link will expire in 24 hours. If you did not create an account, please ignore this email.
-            </p>
-        </div>
-            `,
-        trackingSettings: {
-            clickTracking: {
-                enable: false,
-                enableText: false
-            }
-        }
+        html: verificationTemplate(verificationLink)
     };
+    if (!isValidEmail(email)) {
+        console.log("Invalid email: ", email);
+        return;
+    }
 
-    await sgMail.send(message);
+    sgMail.send(message).catch((error) => {
+        console.log("Send verification email error: ", error);
+    });
+
 }
 
-export const sendForgotPasswordEmail = async (email: string, resetLink: string) => {
+export const sendForgotPasswordEmail = (email: string, resetLink: string) => {
     const message = {
         to: email,
-        from: ENV.SENDGRID_FROM_EMAIL as string,
+        ...emailConfig,
         subject: "Reset Your Password",
-        html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #f44336; text-align: center;">Password Reset Request</h2>
-            
-            <p>We received a request to reset the password for your Local Event Finder account.</p>
-            
-            <p style="text-align: center; margin: 30px 0;">
-                <a href="${resetLink}" style="background-color: #f44336; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">Set New Password</a>
-            </p>
+        html: forgotPasswordTemplate(resetLink)
 
-            <div style="background-color: #fff4f3; padding: 15px; border-left: 4px solid #f44336; margin-bottom: 20px;">
-                <p style="margin: 0; font-size: 14px; color: #d32f2f;">
-                    <strong>Security Note:</strong> This link will expire in <b>1 hour</b> for your protection. 
-                </p>
-            </div>
-
-            <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-                If you did not request a password reset, please ignore this email or contact support if you have concerns.
-            </p>
-        </div>
-        `,
-        trackingSettings: {
-            clickTracking: {
-                enable: false,
-                enableText: false
-            }
-        }
     };
-    await sgMail.send(message);
+
+    if (!isValidEmail(email)) {
+        console.log("Invalid email: ", email);
+        return;
+    }
+
+    sgMail.send(message).catch((error) => {
+        console.log("Send forgetpassword email error: ", error);
+    });
+    //await sgMail.send(message);
 }
 
-export const sendApprovalEmail = async (email: string, name: string) => {
+export const sendApprovalEmail = (email: string, name: string) => {
     const message = {
         to: email,
-        from: ENV.SENDGRID_FROM_EMAIL as string,
+        ...emailConfig,
         subject: "Congratulations! Your Organizer Account is Approved",
-        html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #4CAF50; text-align: center;">Account Approved!</h2>
-            <p>Hello <b>${name}</b>,</p>
-            <p>We are excited to inform you that your application to become an organizer on <strong>Local Event Finder</strong> has been approved by our admin team.</p>
-            
-            <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;">
-                <p style="margin: 0;">You can now log in to your dashboard to start creating and managing events.</p>
-            </div>
-
-            <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-                Welcome to the community! We can't wait to see your events.
-            </p>
-        </div>
-        `,
+        html: approvalTemplate(name)
     }
-    await sgMail.send(message);
+    if (!isValidEmail(email)) {
+        console.log("Invalid email: ", email);
+        return;
+    }
+
+    sgMail.send(message).catch((error) => {
+        console.log("Send approve email error: ", error);
+    });
 }
 
-export const sendRejectionEmail = async (email: string, name: string) => {
+export const sendRejectionEmail = (email: string, name: string) => {
     const message = {
         to: email,
-        from: ENV.SENDGRID_FROM_EMAIL as string,
+        ...emailConfig,
         subject: "Update regarding your Organizer Application",
-        html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #f44336; text-align: center;">Application Update</h2>
-            <p>Hello <b>${name}</b>,</p>
-            <p>Thank you for your interest in joining Local Event Finder. After reviewing your application, we regret to inform you that we cannot approve your organizer account at this time.</p>
-            
-            <p>If you have any questions regarding this decision, please feel free to reach out to our support team.</p>
-
-            <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-                Best regards,<br>The Local Event Finder Team
-            </p>
-        </div>
-        `,
+        html: rejectionTemplate(name)
     }
-    await sgMail.send(message);
+    if (!isValidEmail(email)) {
+        console.log("Invalid email: ", email);
+        return;
+    }
+
+    sgMail.send(message).catch((error) => {
+        console.log("Send reject email error: ", error);
+    });
 }
