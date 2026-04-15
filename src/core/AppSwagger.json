@@ -25,11 +25,12 @@
     }
   },
   "paths": {
-
     "/auth/register": {
       "post": {
         "summary": "Register new user",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -49,13 +50,20 @@
                   "phone": {
                     "type": "string"
                   },
-                  "role" :{
-                    "type": "string", 
-                    "enum": ["user", "organizer"], 
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "organizer"
+                    ],
                     "description": "Defaults to 'user' if not provided"
                   }
                 },
-                "required": ["name", "email", "password"]
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -67,15 +75,17 @@
         }
       }
     },
-
     "/auth/verify-email": {
       "get": {
-        "summary": "Verify user email",
-        "tags": ["Authentication"],
+        "summary": "Verify user email via token",
+        "tags": [
+          "Authentication"
+        ],
         "parameters": [
           {
             "name": "token",
             "in": "query",
+            "description": "The verification token sent to the user's email",
             "required": true,
             "schema": {
               "type": "string"
@@ -85,15 +95,19 @@
         "responses": {
           "200": {
             "description": "Email verified successfully"
+          },
+          "400": {
+            "description": "Invalid or expired token"
           }
         }
       }
     },
-
     "/auth/login": {
       "post": {
         "summary": "User login",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -108,7 +122,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["email", "password"]
+                "required": [
+                  "email",
+                  "password"
+                ]
               }
             }
           }
@@ -120,11 +137,12 @@
         }
       }
     },
-
     "/auth/refresh-token": {
       "post": {
-        "summary": "Generate new access token using refresh token",
-        "tags": ["Authentication"],
+        "summary": "Generate new access token",
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -132,11 +150,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "refresh_token": {
+                  "refreshToken": {
                     "type": "string"
                   }
                 },
-                "required": ["refresh_token"]
+                "required": [
+                  "refreshToken"
+                ]
               }
             }
           }
@@ -148,11 +168,12 @@
         }
       }
     },
-
     "/auth/logout": {
       "post": {
         "summary": "Logout user",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -164,7 +185,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["refresh_token"]
+                "required": [
+                  "refresh_token"
+                ]
               }
             }
           }
@@ -176,11 +199,12 @@
         }
       }
     },
-
     "/auth/forgot-password": {
       "post": {
         "summary": "Send password reset email",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -192,7 +216,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["email"]
+                "required": [
+                  "email"
+                ]
               }
             }
           }
@@ -204,11 +230,12 @@
         }
       }
     },
-
     "/auth/reset-password": {
       "post": {
-        "summary": "Reset user password",
-        "tags": ["Authentication"],
+        "summary": "Reset user password using token",
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -217,29 +244,39 @@
                 "type": "object",
                 "properties": {
                   "token": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The reset token from the email link"
                   },
                   "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 8,
+                    "description": "The new password (min 8 characters)"
                   }
                 },
-                "required": ["token", "password"]
+                "required": [
+                  "token",
+                  "password"
+                ]
               }
             }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Password reset successful"
+          },
+          "responses": {
+            "200": {
+              "description": "Password reset successful"
+            },
+            "400": {
+              "description": "Token expired or invalid password length"
+            }
           }
         }
       }
     },
-
     "/auth/profile": {
       "get": {
         "summary": "Get logged in user profile",
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -252,11 +289,75 @@
         }
       }
     },
-
+    "/auth/update-profile": {
+      "put": {
+        "summary": "Update user name and phone",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          }
+        }
+      }
+    },
     "/categories": {
+      "get": {
+        "summary": "Get all active categories",
+        "tags": [
+          "Category"
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories fetched Successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Categories fetched Successfully!",
+                  "data": [
+                    {
+                      "category_id": 1,
+                      "name": "Music",
+                      "description": "Live concerts and festivals",
+                      "status": "active",
+                      "created_at": "2026-04-09T10:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Create category (Admin only)",
-        "tags": ["Category"],
+        "tags": [
+          "Category"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -276,33 +377,29 @@
                     "type": "string"
                   }
                 },
-                "required": ["name"]
+                "required": [
+                  "name"
+                ]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Category created successfully"
-          }
-        }
-      },
-
-      "get": {
-        "summary": "Get all categories",
-        "tags": ["Category"],
-        "responses": {
-          "200": {
-            "description": "Categories fetched successfully"
+            "description": "Category created successfully!"
+          },
+          "400": {
+            "description": "Category name required or already exists"
           }
         }
       }
     },
-
     "/categories/{id}": {
       "get": {
-        "summary": "Get category by ID",
-        "tags": ["Category"],
+        "summary": "Get specific category by ID",
+        "tags": [
+          "Category"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -315,14 +412,18 @@
         ],
         "responses": {
           "200": {
-            "description": "Category fetched successfully"
+            "description": "Success"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
-
       "put": {
-        "summary": "Update category",
-        "tags": ["Category"],
+        "summary": "Update category details",
+        "tags": [
+          "Category"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -352,7 +453,10 @@
                   },
                   "status": {
                     "type": "string",
-                    "enum": ["active", "inactive"]
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
                   }
                 }
               }
@@ -361,14 +465,18 @@
         },
         "responses": {
           "200": {
-            "description": "Category updated successfully"
+            "description": "Updated"
+          },
+          "400": {
+            "description": "Duplicate Name"
           }
         }
       },
-
       "delete": {
-        "summary": "Delete category",
-        "tags": ["Category"],
+        "summary": "Hard delete a category",
+        "tags": [
+          "Category"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -386,17 +494,22 @@
         ],
         "responses": {
           "200": {
-            "description": "Category deleted successfully"
+            "description": "Deleted successfully"
           }
         }
       }
     },
-
     "/events": {
       "post": {
         "summary": "Create new event (Organizer only)",
-        "tags": ["Events"],
-        "security": [{"bearerAuth": []}],
+        "tags": [
+          "Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -404,136 +517,180 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "category_id": { "type": "integer" },
-                  "title": { "type": "string" },
-                  "description": { "type": "string" },
-                  "location": { "type": "string" },
-                  "start_date": { "type": "string", "format": "date" },
-                  "end_date": { "type": "string", "format": "date" },
-                  "event_time": { "type": "string" },
-                  "ticket_price": { "type": "number" },
-                  "total_seats": { "type": "integer" },
-                  "booking_start_date": { "type": "string", "format": "date", "description": "Date when ticket sales start" },
-                  "booking_end_date": { "type": "string", "format": "date", "description": "Date when ticket sales end" },
-                  "image": { "type": "string", "format": "binary" }
+                  "category_id": {
+                    "type": "integer"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "start_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "event_time": {
+                    "type": "string",
+                    "example": "18:00"
+                  },
+                  "ticket_price": {
+                    "type": "number"
+                  },
+                  "total_seats": {
+                    "type": "integer"
+                  },
+                  "booking_start_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "booking_end_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
                 },
                 "required": [
-                  "category_id", 
-                  "title", 
-                  "start_date", 
-                  "ticket_price", 
-                  "total_seats", 
-                  "booking_start_date", 
+                  "category_id",
+                  "title",
+                  "start_date",
+                  "ticket_price",
+                  "total_seats",
+                  "booking_start_date",
                   "booking_end_date"
                 ]
               }
             }
           }
         },
-        "responses": { 
-          "201": { "description": "Event created successfully in draft status" },
-          "400": { "description": "Validation error (e.g. end date before start date)" }
+        "responses": {
+          "201": {
+            "description": "Event created in draft status"
+          },
+          "400": {
+            "description": "Validation error: Booking end date must be before event start date"
+          }
         }
       },
       "get": {
-        "summary": "Get all events",
-        "tags": ["Events"],
-        "parameters": [
-          { "name": "category_id", "in": "query", "schema": { "type": "integer" } },
-          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] }, "description": "Sort by start_date" }
+        "summary": "Get all events with filters and pagination",
+        "tags": [
+          "Events"
         ],
-        "responses": { "200": { "description": "Success" } }
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "published",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of events fetched successfully"
+          }
+        }
       }
     },
-
     "/events/{id}": {
       "get": {
-        "summary": "Get event by ID with average rating",
-        "tags": ["Events"],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Success - returns event details with average_rating and totalReviews" } }
-      },
-      "put": {
-        "summary": "Update event (Organizer only - Draft status only)",
-        "tags": ["Events"],
-        "security": [{"bearerAuth": []}],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": { "type": "string" },
-                  "description": { "type": "string" },
-                  "location": { "type": "string" },
-                  "start_date": { "type": "string", "format": "date" },
-                  "end_date": { "type": "string", "format": "date" },
-                  "event_time": { "type": "string" },
-                  "ticket_price": { "type": "number" },
-                  "total_seats": { "type": "integer" },
-                  "image": { "type": "string", "format": "binary" }
+        "summary": "Get event details with review stats",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "average_rating": {
+                      "type": "number"
+                    },
+                    "totalReviews": {
+                      "type": "integer"
+                    }
+                  }
                 }
               }
             }
           }
-        },
-        "responses": { 
-          "200": { "description": "Event updated successfully" },
-          "400": { "description": "Cannot update: status not draft or seat reduction conflict" },
-          "403": { "description": "Unauthorized to update this event" }
-        }
-      },
-      "delete": {
-        "summary": "Delete event",
-        "tags": ["Events"],
-        "security": [{"bearerAuth": []}],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { 
-          "200": { "description": "Event deleted successfully" },
-          "403": { "description": "Unauthorized to delete this event" }
         }
       }
     },
-
     "/bookings": {
       "post": {
         "summary": "Book tickets for an event",
-        "tags": ["Bookings"],
-        "security": [{"bearerAuth": []}],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "event_id": { "type": "integer" },
-                  "ticket_quantity": { "type": "integer" }
-                },
-                "required": ["event_id", "ticket_quantity"]
-              }
-            }
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
           }
-        },
-        "responses": { "201": { "description": "Booking created" } }
-      }
-    },
-    
-    "/bookings/{id}/cancel": {
-      "put": {
-        "summary": "Cancel a booking",
-        "tags": ["Bookings"],
-        "security": [{"bearerAuth": []}],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Booking cancelled" } }
-      }
-    },
-    "/reviews": {
-      "post": {
-        "summary": "Add a review for an event",
-        "tags": ["Reviews"],
-        "security": [{"bearerAuth": []}],
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -541,51 +698,175 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "event_id": { "type": "integer" },
-                  "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
-                  "review_text": { "type": "string" }
+                  "event_id": {
+                    "type": "integer"
+                  },
+                  "ticket_quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
                 },
-                "required": ["event_id", "rating"]
+                "required": [
+                  "event_id",
+                  "ticket_quantity"
+                ]
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Review added successfully" },
-          "400": { "description": "Validation error or duplicate review" },
-          "401": { "description": "Unauthorized" }
+          "201": {
+            "description": "Booking successful"
+          },
+          "400": {
+            "description": "Insufficient seats or booking period closed"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get logged-in user's booking history",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bookings fetched successfully"
+          }
+        }
+      }
+    },
+    "/bookings/{id}/cancel": {
+      "put": {
+        "summary": "Cancel an existing booking",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking cancelled and seats restored"
+          },
+          "403": {
+            "description": "Unauthorized to cancel this booking"
+          }
+        }
+      }
+    },
+    "/reviews": {
+      "post": {
+        "summary": "Add a review for an event",
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event_id": {
+                    "type": "integer"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "review_text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "event_id",
+                  "rating"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review added successfully"
+          },
+          "400": {
+            "description": "Validation error or duplicate review"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
         }
       }
     },
     "/reviews/event/{event_id}": {
       "get": {
         "summary": "Get all reviews for a specific event",
-        "tags": ["Reviews"],
+        "tags": [
+          "Reviews"
+        ],
         "parameters": [
           {
             "name": "event_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
-          "200": { "description": "Reviews fetched successfully" },
-          "404": { "description": "Event not found" }
+          "200": {
+            "description": "Reviews fetched successfully"
+          },
+          "404": {
+            "description": "Event not found"
+          }
         }
       }
     },
     "/reviews/{review_id}": {
       "put": {
         "summary": "Update an existing review",
-        "tags": ["Reviews"],
-        "security": [{"bearerAuth": []}],
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "review_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "requestBody": {
@@ -594,98 +875,192 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
-                  "review_text": { "type": "string" }
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "review_text": {
+                    "type": "string"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Review updated successfully" },
-          "404": { "description": "Review not found or unauthorized" }
+          "200": {
+            "description": "Review updated successfully"
+          },
+          "404": {
+            "description": "Review not found or unauthorized"
+          }
         }
       },
       "delete": {
         "summary": "Delete a review",
-        "tags": ["Reviews"],
-        "security": [{"bearerAuth": []}],
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "review_id",
             "in": "path",
             "required": true,
-            "schema": { "type": "integer" }
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
-          "200": { "description": "Review deleted successfully" },
-          "404": { "description": "Review not found" }
+          "200": {
+            "description": "Review deleted successfully"
+          },
+          "404": {
+            "description": "Review not found"
+          }
         }
       }
     },
-    "/admin/organizer/{id}/approve": {
-      "put": {
-        "summary": "Approve an organizer application",
-        "tags": ["Admin"],
-        "security": [{"bearerAuth": []}],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "responses": {
-          "200": { "description": "Organizer approved successfully" },
-          "400": { "description": "User is not an organizer or already processed" },
-          "404": { "description": "User not found" }
-        }
-      }
-    },
-
-    "/admin/organizer/{id}/reject": {
-      "put": {
-        "summary": "Reject an organizer application",
-        "tags": ["Admin"],
-        "security": [{"bearerAuth": []}],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "responses": {
-          "200": { "description": "Organizer rejected successfully" },
-          "400": { "description": "User is not an organizer or already processed" },
-          "404": { "description": "User not found" }
-        }
-      }
-    },
-
-    "/organizer/dashboard": {
+    "/admin/organizers": {
       "get": {
-        "summary": "Get comprehensive dashboard statistics for the logged-in organizer",
-        "tags": ["Organizer"],
-        "security": [{"bearerAuth": []}],
+        "summary": "Get list of all registered organizers (Admin only)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Dashboard statistics fetched successfully",
-            "content": {
-              "application/json": {
-                "example": {
-                  "success": true,
-                  "message": "Details fetched successfully!",
-                  "data": {
-                    "total_Events": 5,
-                    "total_Sold_Tickets": 120,
-                    "total_revenue": 5000.50,
-                    "upcoming_events": [],
-                    "pastEvents": []
-                  }
-                }
-              }
-            }
+            "description": "Organizer list fetched successfully"
           },
-          "401": { "description": "Unauthorized User" },
-          "403": { "description": "Forbidden - Only organizers allowed" }
+          "403": {
+            "description": "Forbidden - Only Admin can access this list"
+          }
+        }
+      }
+    },
+    "/admin/adminDashboard": {
+      "get": {
+        "summary": "Get overall system statistics (Admin only)",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stats fetched successfully"
+          }
+        }
+      }
+    },
+    "/admin/approve-organizer/{id}": {
+      "put": {
+        "summary": "Approve an organizer application",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organizer approved successfully"
+          },
+          "400": {
+            "description": "Invalid ID or already processed"
+          }
+        }
+      }
+    },
+    "/admin/reject-organizer/{id}": {
+      "put": {
+        "summary": "Reject an organizer application",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organizer rejected successfully"
+          }
+        }
+      }
+    },
+    "/events/my-events": {
+      "get": {
+        "summary": "Get all events owned by the logged-in organizer",
+        "tags": [
+          "Events",
+          "Organizer"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organizer's event fetched successfully"
+          }
+        }
+      }
+    },
+    "/organizer/dashboard": {
+      "get": {
+        "summary": "Get personal dashboard stats for organizer",
+        "tags": [
+          "Organizer"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details fetched successfully"
+          }
         }
       }
     }
-    
-
   }
 }

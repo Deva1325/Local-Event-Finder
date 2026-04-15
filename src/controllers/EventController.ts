@@ -7,6 +7,7 @@ import { ReviewModel } from "../models";
 import { sequelize_db } from "../config/db";
 import { logAudit } from "../utils/auditLogger";
 import fs from 'fs';
+import { AuthRequest } from "../types/AuthRequest";
 
 export const createEvent = async (req: Request, res: Response) => {
     try {
@@ -363,3 +364,24 @@ export const cancelEvent = async (req: Request, res: Response) => {
         return errorResponse(res, "Internal server error", 500);
     }
 } 
+
+export const getEventsByOrganizer = async (req:AuthRequest,res: Response) => {
+    try {
+        const organizerId=req.user?.user_id;
+
+        if (!organizerId) {
+            return errorResponse(res,"Organizer ID is required",400);
+        }
+
+        const events=await EventModel.findAll({
+            where: { organizer_id: organizerId },
+            order: [['created_datetime','DESC']]
+        });
+
+        return successResponse(res,"Organizer's event fetched successfully",events,200);
+
+    } catch (error) {
+        console.log("Error while fetching organizer events",error);
+        return errorResponse(res,"Internal Server Error",500);
+    }
+}

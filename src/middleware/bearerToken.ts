@@ -2,8 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import { ENV } from "../config/env";
 import jwt from "jsonwebtoken";
 import { errorResponse } from "../utils/response";
+import { AuthRequest } from "../types/AuthRequest";
 
-export const bearerToken = async (req: Request, res: Response, next: NextFunction) => {
+export const bearerToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -19,7 +20,9 @@ export const bearerToken = async (req: Request, res: Response, next: NextFunctio
 
         const decoded: any = jwt.verify(token, ENV.JWT_SECRET as string);
 
-        (req as any).user = decoded;
+        //(req as any).user = decoded;
+
+        req.user= decoded as any;
 
         next();
     } catch (error) {

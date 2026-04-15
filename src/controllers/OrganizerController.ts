@@ -4,9 +4,10 @@ import { EventModel } from "../models";
 import BookingModel from "../models/BookingModel";
 import { sequelize_db } from "../config/db";
 import { Op } from "sequelize";
+import { AuthRequest } from "../types/AuthRequest";
 
 
-export const getOrganizerDashboard = async (req:Request,res:Response) => {
+export const getOrganizerDashboard = async (req:AuthRequest,res:Response) => {
     try {
         const user=(req as any).user;
 

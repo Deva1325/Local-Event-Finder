@@ -7,6 +7,7 @@ import { sequelize_db } from "../config/db";
 import { logAudit } from "../utils/auditLogger";
 import { sendApprovalEmail, sendRejectionEmail } from "../utils/notification";
 import { ROLES,ORGANIZER_STATUS,BOOKING_STATUS } from "../constants/status";
+import { AuthRequest } from "../types/AuthRequest";
 
 export const handleOrganizerStatus = async (req:Request,res:Response,
     status: typeof ORGANIZER_STATUS.APPROVED | typeof ORGANIZER_STATUS.REJECTED ) => {
@@ -108,6 +109,28 @@ export const getAdminDashboard = async (req:Request,res:Response) => {
     }
 }
 
+export const getAllOrganizers = async (req:AuthRequest,res:Response) => {
+    try {
+        if (req.user?.role!=='admin') {
+            return errorResponse(res,"Only admin can see this list",403);
+        }
+
+        const organizers=await UserModel.findAll({
+            where: {
+                role: 'organizer'
+            },
+            attributes: ['user_id','name','email','organizer_status','created_at'],
+            order: [['created_at','DESC']]
+        });
+
+        return successResponse(res,"Organizer list fetched",organizers,200);
+        
+    } catch (error) {
+        console.log("Error in get all organizers",error);
+        
+        return errorResponse(res,"Internal server error",500);
+    }
+}
 
 
 // export const getAdminDashboard = async (req:Request,res:Response) => {  

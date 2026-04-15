@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { errorResponse } from "../utils/response";
+import { AuthRequest } from "../types/AuthRequest";
 
 export const authorizeRoles = (...roles: string[]) => {
+    return (req: AuthRequest, res: Response, next: NextFunction) => {
 
-    return (req: Request, res: Response, next: NextFunction) => {
-
-        const user = (req as any).user;
+        //const user = (req as any).user;
+        const user=req.user;
 
         if (!user) {
             return errorResponse(res, "User not authorized", 401);
