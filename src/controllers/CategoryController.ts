@@ -56,7 +56,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
 
-        if (!isNumber(id) && id<=0) {
+        if (!isNumber(id) || id<=0) {
             return errorResponse(res,"Invalid category id",400);
         }
 

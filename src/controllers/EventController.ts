@@ -58,7 +58,7 @@ export const createEvent = async (req: Request, res: Response) => {
             if (req.file) {
                 fs.unlinkSync(req.file.path);
             }
-            return errorResponse(res,"Event already exists for this date",400);
+            return errorResponse(res, "Event already exists for this date", 400);
         }
 
         let image_url = null;
@@ -121,9 +121,9 @@ export const getAllEvent = async (req: Request, res: Response) => {
         let filterCategory: any = {};
 
         if (category_id) {
-            filterCategory.category_id = category_id;
+            filterCategory.category_id=Number(category_id);
         }
-
+        
         if (status) {
             filterCategory.status = status;
         }
@@ -148,7 +148,7 @@ export const getAllEvent = async (req: Request, res: Response) => {
         return successResponse(res, "All Events fetched successfully!", events, 200);
     } catch (error) {
         console.error("Get all events error: ", error);
-        
+
         //log.error("Get all events error: ", error);
         return errorResponse(res, "Internal server error", 500);
     }
@@ -219,34 +219,34 @@ export const updateEvent = async (req: Request, res: Response) => {
         const { title, description, location, start_date, end_date, event_time, ticket_price, total_seats } = req.body;
 
         const price = ticket_price !== undefined ? Number(ticket_price) : undefined;
-        const seats=total_seats!==undefined? Number(total_seats) : undefined;
+        const seats = total_seats !== undefined ? Number(total_seats) : undefined;
 
         let newAvailableSeats = event.available_seats;
 
         const soldTickets = event.total_seats - event.available_seats; // db value => current state
 
-        if (price!==undefined && price<0) {
-            return errorResponse(res,"Ticket Price cannot be negative",400);
+        if (price !== undefined && price < 0) {
+            return errorResponse(res, "Ticket Price cannot be negative", 400);
         }
 
-        if (seats!=undefined && seats<=0) {
-            return errorResponse(res,"Total seats must be greater than 0",400);
+        if (seats != undefined && seats <= 0) {
+            return errorResponse(res, "Total seats must be greater than 0", 400);
         }
 
         //if new total_seats are updated then
-        if (seats!==undefined) {
-            if (seats<soldTickets) {
+        if (seats !== undefined) {
+            if (seats < soldTickets) {
                 return errorResponse(res, `total_seats cannot be less than sold tickets`, 400);
             }
-            newAvailableSeats=seats-soldTickets;
+            newAvailableSeats = seats - soldTickets;
         }
-    
+
         let updateimg = event.image_url;
 
         if (req.file) {
 
             if (event.image_url) {
-                const publicId= event.image_url.split("/").pop()?.split(".")[0]; 
+                const publicId = event.image_url.split("/").pop()?.split(".")[0];
                 // extract public_id from URL
 
                 if (publicId) {
@@ -254,10 +254,11 @@ export const updateEvent = async (req: Request, res: Response) => {
                 }
             }
 
-            const result = await cloudinary.uploader.upload(req.file.path, { 
-                folder: "local_events_demo" });
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "local_events_demo"
+            });
             updateimg = result.secure_url;
-        
+
             fs.unlinkSync(req.file.path);
         }
 
@@ -363,25 +364,25 @@ export const cancelEvent = async (req: Request, res: Response) => {
     } catch (error) {
         return errorResponse(res, "Internal server error", 500);
     }
-} 
+}
 
-export const getEventsByOrganizer = async (req:AuthRequest,res: Response) => {
+export const getEventsByOrganizer = async (req: AuthRequest, res: Response) => {
     try {
-        const organizerId=req.user?.user_id;
+        const organizerId = req.user?.user_id;
 
         if (!organizerId) {
-            return errorResponse(res,"Organizer ID is required",400);
+            return errorResponse(res, "Organizer ID is required", 400);
         }
 
-        const events=await EventModel.findAll({
+        const events = await EventModel.findAll({
             where: { organizer_id: organizerId },
-            order: [['created_datetime','DESC']]
+            order: [['created_datetime', 'DESC']]
         });
 
-        return successResponse(res,"Organizer's event fetched successfully",events,200);
+        return successResponse(res, "Organizer's event fetched successfully", events, 200);
 
     } catch (error) {
-        console.log("Error while fetching organizer events",error);
-        return errorResponse(res,"Internal Server Error",500);
+        console.log("Error while fetching organizer events", error);
+        return errorResponse(res, "Internal Server Error", 500);
     }
 }

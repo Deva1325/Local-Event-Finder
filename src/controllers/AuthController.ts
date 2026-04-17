@@ -415,7 +415,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (password.length < 8) {
       return errorResponse(res, "Password must be at least 8 characters long", 400);
     }
-    
+
     const user = await UserModel.findOne({ where: { reset_password_token: token } });
 
     if (!user) {

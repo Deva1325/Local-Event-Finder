@@ -22,6 +22,17 @@
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
+    },
+    "schemas": {
+      "EventStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "published",
+          "cancelled"
+        ],
+        "description": "Current state of the event"
+      }
     }
   },
   "paths": {
@@ -256,13 +267,11 @@
                 "type": "object",
                 "properties": {
                   "token": {
-                    "type": "string",
-                    "description": "The reset token from the email link"
+                    "type": "string"
                   },
                   "password": {
                     "type": "string",
-                    "minLength": 8,
-                    "description": "The new password (min 8 characters)"
+                    "minLength": 8
                   }
                 },
                 "required": [
@@ -271,14 +280,14 @@
                 ]
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful"
           },
-          "responses": {
-            "200": {
-              "description": "Password reset successful"
-            },
-            "400": {
-              "description": "Token expired or invalid password length"
-            }
+          "400": {
+            "description": "Invalid token or password"
           }
         }
       }
@@ -366,7 +375,7 @@
         }
       },
       "post": {
-        "summary": "Create category (Admin only)",
+        "summary": "Create category (REQUIRES ADMIN ROLE)",
         "tags": [
           "Category"
         ],
@@ -690,6 +699,116 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Update event details (Organizer only)",
+        "tags": [
+          "Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "ticket_price": {
+                    "type": "number"
+                  },
+                  "total_seats": {
+                    "type": "integer"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an event",
+        "tags": [
+          "Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event deleted successfully"
+          }
+        }
+      }
+    },
+    "/events/{id}/cancel": {
+      "patch": {
+        "summary": "Cancel an event (Organizer only)",
+        "tags": [
+          "Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event cancelled successfully"
+          }
+        }
       }
     },
     "/bookings": {
@@ -729,12 +848,11 @@
         "responses": {
           "201": {
             "description": "Booking successful"
-          },
-          "400": {
-            "description": "Insufficient seats or booking period closed"
           }
         }
-      },
+      }
+    },
+    "/bookings/mybookings": {
       "get": {
         "summary": "Get logged-in user's booking history",
         "tags": [
@@ -752,7 +870,7 @@
         }
       }
     },
-    "/bookings/{id}/cancel": {
+    "/bookings/cancel/{id}": {
       "put": {
         "summary": "Cancel an existing booking",
         "tags": [
@@ -775,10 +893,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Booking cancelled and seats restored"
-          },
-          "403": {
-            "description": "Unauthorized to cancel this booking"
+            "description": "Booking cancelled successfully"
           }
         }
       }
@@ -973,7 +1088,43 @@
         ],
         "responses": {
           "200": {
-            "description": "Stats fetched successfully"
+            "description": "Stats fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Stats fetched successfully!"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalUsers": {
+                          "type": "integer"
+                        },
+                        "totalOrganizers": {
+                          "type": "integer"
+                        },
+                        "totalEvents": {
+                          "type": "integer"
+                        },
+                        "totalBookings": {
+                          "type": "integer"
+                        },
+                        "totalRevenue": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1037,25 +1188,6 @@
         }
       }
     },
-    "/events/my-events": {
-      "get": {
-        "summary": "Get all events owned by the logged-in organizer",
-        "tags": [
-          "Events",
-          "Organizer"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organizer's event fetched successfully"
-          }
-        }
-      }
-    },
     "/organizer/dashboard": {
       "get": {
         "summary": "Get personal dashboard stats for organizer",
@@ -1067,9 +1199,54 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Details fetched successfully"
+            "description": "Dashboard fetched successfully!"
+          }
+        }
+      }
+    },
+    "/events/my-events": {
+      "get": {
+        "summary": "Get all events created by the logged-in organizer",
+        "tags": [
+          "Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organizer events fetched successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Organizer's event fetched successfully",
+                  "data": []
+                }
+              }
+            }
           }
         }
       }

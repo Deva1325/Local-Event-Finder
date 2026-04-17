@@ -14,7 +14,7 @@ export const handleOrganizerStatus = async (req:Request,res:Response,
     
     const user_id=Number(req.params.id);
 
-    if (!isNumber(user_id)) {
+    if (!isNumber(user_id) || user_id<=0) {
         return errorResponse(res,"Invalid User Id",400);
     }
 

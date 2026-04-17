@@ -4,6 +4,6 @@ import { getOrganizerDashboard } from '../controllers/OrganizerController';
 
 const router = express.Router();
 
-router.get('/OrganizerDashboard', bearerToken, getOrganizerDashboard);
+router.get('/dashboard', bearerToken, getOrganizerDashboard);
 
 export default router;
