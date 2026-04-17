@@ -110,6 +110,8 @@ export const getReviewsByEvent = async (req: Request, res: Response) => {
             order: [["created_at", "DESC"]],
             limit, offset
         });
+        //console.log(reviews);
+
 
         return successResponse(res, "Reviews fetched successfully", reviews, 200);
     } catch (error) {
@@ -148,7 +150,7 @@ export const updateReview = async (req: Request, res: Response) => {
                 return errorResponse(res, "Rating must be a number", 400);
             }
 
-            ratingValue=Number(rating);
+            ratingValue = Number(rating);
 
             if (rating < 1 || rating > 5) {
                 return errorResponse(res, "Rating must be between 1 to 5", 400);
@@ -156,7 +158,7 @@ export const updateReview = async (req: Request, res: Response) => {
         }
 
         await review.update({
-            rating: ratingValue?? review.rating,
+            rating: ratingValue ?? review.rating,
             review_text
         });
 

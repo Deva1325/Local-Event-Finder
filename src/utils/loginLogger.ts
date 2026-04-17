@@ -1,12 +1,11 @@
 import LoginLogModel from "../models/LoginLogModel";
 
-
-
 export const createLoginLog = async (userId:number | null,ip: string| null) => {
     try {
         const logs=await LoginLogModel.create({
             user_id: userId,
-            ip_address: ip
+            ip_address: ip,
+            login_time: new Date()
         });
 
         return logs.login_log_id;
@@ -15,19 +14,19 @@ export const createLoginLog = async (userId:number | null,ip: string| null) => {
         console.log("Login log error",error);
     }
 }
-
-export const updateLogoutLog = async (logId:number) => {
-    try {
-        await LoginLogModel.update(
-            {
-                logout_time: new Date(),
-                is_logout: true
-            },
-            {
-                where: { login_log_id: logId }
-            }
-        );
-    } catch (error) {
-        console.log("logout log error",error);
-    }
-}
+                         
+// export const updateLogoutLog = async (logId:number) => {
+//     try {
+//         await LoginLogModel.update(
+//             {
+//                 logout_time: new Date(),
+//                 is_logout: true
+//             },
+//             {
+//                 where: { login_log_id: logId }
+//             }
+//         );
+//     } catch (error) {
+//         console.log("logout log error",error);
+//     }
+// }

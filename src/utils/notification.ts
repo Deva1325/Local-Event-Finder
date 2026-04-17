@@ -40,7 +40,6 @@ export const sendForgotPasswordEmail = (email: string, resetLink: string) => {
         ...emailConfig,
         subject: "Reset Your Password",
         html: forgotPasswordTemplate(resetLink)
-
     };
 
     if (!isValidEmail(email)) {

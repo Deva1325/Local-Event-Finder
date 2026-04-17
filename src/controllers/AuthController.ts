@@ -8,6 +8,9 @@ import { ENV } from "../config/env";
 import { sendVerificationEmail, sendForgotPasswordEmail } from "../utils/notification";
 import { successResponse, errorResponse } from "../utils/response";
 import { logAudit } from '../utils/auditLogger';
+import { createLoginLog } from "../utils/loginLogger";
+import LoginLogModel from "../models/LoginLogModel";
+
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -29,10 +32,6 @@ export const register = async (req: Request, res: Response) => {
     if (role && !allowedRoles.includes(role)) {
       return errorResponse(res, "Invalid role selected", 400);
     }
-
-    //   if (req.body.role) {
-    //     return errorResponse(res, "Role assignment not allowed during registration", 403);
-    // }
 
     //paranoid: false - if the user is deleted and then again register with same email
     const existingUser = await UserModel.findOne({
@@ -181,6 +180,8 @@ export const login = async (req: Request, res: Response) => {
       refresh_token: refreshToken
     })
 
+    const logId = await createLoginLog(user.user_id, req.ip || null);
+
     await logAudit({
       userId: user.user_id,
       action: "User_Login",
@@ -192,7 +193,8 @@ export const login = async (req: Request, res: Response) => {
 
     return successResponse(res, "Login successful", {
       accessToken: accessToken,
-      refreshToken: refreshToken
+      refreshToken: refreshToken,
+      loginLogId: logId
     });
 
   } catch (error) {
@@ -289,6 +291,8 @@ export const verifyEmail = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
   try {
     const { refresh_token } = req.body;
+    // console.log("logout",{refresh_token,loginLogId});
+
 
     if (!refresh_token) {
       return errorResponse(res, "Refresh token is required", 400);
@@ -306,6 +310,24 @@ export const logout = async (req: Request, res: Response) => {
     await user.update({
       refresh_token: null
     });
+
+    const activeLog = await LoginLogModel.findOne({
+      where: {
+        user_id: user.user_id,
+        is_logout: false
+      },
+      order: [['login_time', 'DESC']]
+    });
+
+    if (activeLog) {
+      await activeLog.update({
+        logout_time: new Date(),
+        is_logout: true
+      });
+    }
+
+    //console.log("logout activeLog",activeLog);
+    //console.log("Logout activeLog: ",activeLog);
 
     await logAudit({
       userId: user.user_id,
@@ -368,7 +390,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     //const resetPassword_Link = `${ENV.BASE_URL}/api/auth/reset-password?token=${reset_token}`;
     const resetPassword_Link = `${ENV.FRONTEND_URL}/reset-password?token=${reset_token}`;
 
-    //console.log(resetPassword_Link);
+    console.log(resetPassword_Link);
 
     await sendForgotPasswordEmail(user.email, resetPassword_Link);
 
@@ -393,6 +415,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (password.length < 8) {
       return errorResponse(res, "Password must be at least 8 characters long", 400);
     }
+    
     const user = await UserModel.findOne({ where: { reset_password_token: token } });
 
     if (!user) {
@@ -476,10 +499,17 @@ export const updateProfile = async (req: Request, res: Response) => {
       ipAddress: req.ip || null
     });
 
-    return successResponse(res, "User profile updated successfully", user);
+    const updatedUser = await UserModel.findOne({
+      where: { user_id: user.user_id },
+      attributes: {
+        exclude: ["password", "refresh_token", "verification_token", "verification_token_expiry", "reset_password_token", "reset_password_expiry"]
+      }
+    });
+
+    return successResponse(res, "User profile updated successfully", updatedUser);
 
   } catch (error) {
     console.error("Update profile error: ", error);
     return errorResponse(res, "Internal server error", 500);
   }
-}
+} 

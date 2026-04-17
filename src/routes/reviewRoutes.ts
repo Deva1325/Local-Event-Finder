@@ -6,7 +6,9 @@ const router = express.Router();
 
 router.post('/', bearerToken, createReview);
 router.put('/:review_id', bearerToken, updateReview);
+
 router.get('/:event_id', getReviewsByEvent);
+
 router.delete('/:review_id', bearerToken, deleteReview);
 
 

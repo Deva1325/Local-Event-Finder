@@ -14,29 +14,30 @@ export const verificationTemplate = (verificationLink: string) =>
         </div>        `
     ;
 
-export const forgotPasswordTemplate = (resetLink: string) =>
+    export const forgotPasswordTemplate = (resetLink: string) =>
     `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-            <h2 style="color: #f44336; text-align: center;">Password Reset Request</h2>
+            <h2 style="color: #1a73e8; text-align: center;">Password Reset Request</h2>
             
             <p>We received a request to reset the password for your Local Event Finder account.</p>
             
             <p style="text-align: center; margin: 30px 0;">
-                <a href="${resetLink}" style="background-color: #f44336; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">Set New Password</a>
+                <a href="${resetLink}" style="background-color: #1a73e8; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">Set New Password</a>
             </p>
 
-            <div style="background-color: #fff4f3; padding: 15px; border-left: 4px solid #f44336; margin-bottom: 20px;">
-                <p style="margin: 0; font-size: 14px; color: #d32f2f;">
+            <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #1a73e8; margin-bottom: 20px;">
+                <p style="margin: 0; font-size: 14px; color: #555;">
                     <strong>Security Note:</strong> This link will expire in <b>1 hour</b> for your protection. 
                 </p>
             </div>
 
             <p style="font-size: 13px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
                 If you did not request a password reset, please ignore this email or contact support if you have concerns.
-            </p>
-        </div>
+            </p> 
+        </div> 
         `
     ;
+    
 
 export const approvalTemplate = (name: string) =>
     `
@@ -70,4 +71,7 @@ export const rejectionTemplate = (name: string) =>
             </p>
         </div>
         `
-    ;       
+    ;   
+    
+    
+    
