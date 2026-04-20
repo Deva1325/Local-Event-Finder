@@ -129,6 +129,8 @@ export const deleteCategory = async (req: Request, res: Response) => {
             return errorResponse(res, "Category not found", 404);
         }
 
+        //console.log(category);
+        
         // await category.update({
         //    status: "inactive"
         // }); 

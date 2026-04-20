@@ -898,6 +898,72 @@
         }
       }
     },
+    "/bookings/event/{event_id}": {
+      "get": {
+        "summary": "Get all bookings for a specific event (Organizer only)",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the event"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event bookings fetched successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Event booking fetched successfully!",
+                  "data": [
+                    {
+                      "booking_id": 1,
+                      "ticket_quantity": 2,
+                      "total_amount": 500,
+                      "booking_status": "confirmed",
+                      "event": {
+                        "title": "Music Concert",
+                        "start_date": "2026-05-01"
+                      },
+                      "user": {
+                        "user_id": 56,
+                        "name": "Dev Patel",
+                        "email": "dev@test.com"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid event ID"
+          },
+          "403": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Event not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/reviews": {
       "post": {
         "summary": "Add a review for an event",

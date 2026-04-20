@@ -6,6 +6,7 @@ import { sequelize_db } from "../config/db";
 import { isEmpty, isNumber } from "../utils/validator";
 import { logAudit } from "../utils/auditLogger";
 import { BOOKING_STATUS, EVENT_STATUS } from "../constants/status";
+import { UserModel } from "../models";
 
 export const createBooking = async (req: Request, res: Response) => {
 
@@ -176,6 +177,13 @@ export const getMyBookings = async (req: Request, res: Response) => {
 
         const mybookings = await BookingModel.findAll({
             where: { user_id: user.user_id },
+            include: [
+                {
+                    model: EventModel,
+                    as: "event",
+                    attributes: ["event_id", "title", "start_date", "event_time", "ticket_price"]
+                }
+            ],
             order: [['created_at', 'DESC']]
         });
         //console.log("mybookings: ",mybookings);
@@ -184,6 +192,50 @@ export const getMyBookings = async (req: Request, res: Response) => {
     } catch (error) {
         console.log("Get my bookings error: ", error);
 
+        return errorResponse(res, "Internal Server Error", 500);
+    }
+}
+
+export const getBookingsByEvent = async (req: Request, res: Response) => {
+    try {
+        const user = (req as any).user;
+        const event_id = Number(req.params.event_id);
+
+        if (!event_id) {
+            return errorResponse(res, "Event ID is required!", 400);
+        }
+
+        const event = await EventModel.findByPk(event_id);
+
+        if (!event) {
+            return errorResponse(res, "Event Not Found", 404);
+        }
+
+        if (event.organizer_id !== user.user_id) {
+            return errorResponse(res, "Unauthorized access", 403);
+        }
+
+        const bookings = await BookingModel.findAll({
+            where: { event_id },
+            include: [
+                {
+                    model: EventModel,
+                    as: "event",
+                    attributes: ["title", "start_date"]
+                },
+                {
+                    model: UserModel,
+                    as: "user",
+                    attributes: ["user_id", "name", "email"]
+                }
+            ],
+            order: [["created_at", "DESC"]]
+        });
+
+        return successResponse(res, "Event booking fetched successfully!", bookings);
+
+    } catch (error) {
+        console.log("Error in bookings pr event", error);
         return errorResponse(res, "Internal Server Error", 500);
     }
 }

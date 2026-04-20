@@ -11,7 +11,6 @@ import { logAudit } from '../utils/auditLogger';
 import { createLoginLog } from "../utils/loginLogger";
 import LoginLogModel from "../models/LoginLogModel";
 
-
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role } = req.body;
@@ -33,10 +32,8 @@ export const register = async (req: Request, res: Response) => {
       return errorResponse(res, "Invalid role selected", 400);
     }
 
-    //paranoid: false - if the user is deleted and then again register with same email
     const existingUser = await UserModel.findOne({
       where: { email }
-      //paranoid : false
     });
 
 
